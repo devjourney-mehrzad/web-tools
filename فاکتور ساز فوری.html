@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>فاکتور ساز حرفه‌ای (تک صفحه‌ای)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- فونت وزیرمتن برای تایپوگرافی بهتر فارسی -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --secondary: #f59e0b;
+      --secondary-light: #fbbf24;
+      --accent: #f97316;
+      --bg: #ffffff;
+      --bg-soft: #f8fafc;
+      --bg-softer: #f1f5f9;
+      --card: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                   0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --transition: all 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding: 16px;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--bg);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #fff;
+    }
+
+    .title-group h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .title-group p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: var(--bg-soft);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .btn span.icon {
+      font-size: 16px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+    }
+    .btn-primary:hover {
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      background: #fff;
+      color: var(--text-main);
+      border-color: var(--border);
+    }
+    .btn-outline:hover {
+      background: var(--bg-soft);
+    }
+    .btn-danger {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+    .btn-danger:hover {
+      background: #fecaca;
+    }
+
+    .app-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: 20px;
+      padding: 20px 24px 24px;
+      background: var(--bg-soft);
+    }
+
+    @media (max-width: 960px) {
+      .app-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 16px 18px 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .card-header h2 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .card-header small {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 12px 0 6px;
+      color: var(--text-main);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 14px;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 13px;
+    }
+
+    .form-field label {
+      font-weight: 500;
+    }
+
+    input, textarea {
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 13px;
+      transition: var(--transition);
+      background: #fff;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .invoice-meta {
+      margin-top: 10px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border-light);
+      margin: 10px 0 12px;
+    }
+
+    /* جدول اقلام */
+    .items-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .items-table-wrapper {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead {
+      background: var(--bg-soft);
+    }
+
+    th, td {
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--border-light);
+      text-align: right;
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .item-input {
+      width: 100%;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      padding: 5px 6px;
+      font-size: 12px;
+    }
+
+    .item-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+    }
+
+    .item-number {
+      width: 50px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .item-actions {
+      display: flex;
+      justify-content: center;
+    }
+
+    .btn-icon {
+      padding: 4px 6px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+    .btn-icon:hover {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .items-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .mt-1 { margin-top: 8px; }
+    .mt-2 { margin-top: 12px; }
+    .mt-3 { margin-top: 16px; }
+
+    /* پیش‌نمایش فاکتور */
+    .invoice-preview {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 18px 20px 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .logo-box {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .company-preview h3 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .company-preview p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .invoice-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: left;
+    }
+    .invoice-label strong {
+      display: block;
+      font-size: 18px;
+      color: var(--text-main);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 14px;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .meta-item span:first-child {
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    .party-boxes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .party-card {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      background: var(--bg-softer);
+    }
+
+    .party-card h4 {
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .party-card p {
+      color: var(--text-muted);
+    }
+
+    .preview-items-table {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .preview-items-table table th {
+      font-size: 12px;
+    }
+
+    .preview-items-table table td {
+      font-size: 12px;
+    }
+
+    .totals-box {
+      margin-top: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      font-size: 12px;
+      background: var(--bg-softer);
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+    }
+
+    .total-row.total-main {
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+      padding-top: 5px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .note-box {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .note-box strong {
+      color: var(--text-main);
+    }
+
+    /* نوار پایین */
+    .app-footer {
+      padding: 10px 18px 14px;
+      border-top: 1px solid var(--border-light);
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-softer);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    /* پرینت */
+    @media print {
+      body {
+        padding: 0;
+        background: #fff;
+      }
+      .app-header,
+      .app-body > .builder,
+      .app-footer {
+        display: none !important;
+      }
+      .app-body {
+        padding: 0;
+        display: block;
+      }
+      .invoice-preview {
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- هدر بالا -->
+    <header class="app-header">
+      <div class="title-group">
+        <h1>فاکتورساز حرفه‌ای</h1>
+        <p>ساخت فاکتور زیبا، تک‌صفحه‌ای و آماده پرینت</p>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn-outline" id="btnNewInvoice">
+          <span class="icon">🧾</span>
+          فاکتور جدید
+        </button>
+        <button class="btn btn-primary" id="btnPrint">
+          <span class="icon">🖨️</span>
+          چاپ / ذخیره PDF
+        </button>
+      </div>
+    </header>
+
+    <!-- بدنه: سازنده + پیش‌نمایش -->
+    <div class="app-body">
+      <!-- ستون سازنده -->
+      <section class="builder card">
+        <div class="card-header">
+          <div>
+            <h2>اطلاعات فاکتور</h2>
+            <small>در همین صفحه همه چیز را کامل کن</small>
+          </div>
+        </div>
+
+        <!-- اطلاعات شرکت -->
+        <div class="section-title">اطلاعات صادرکننده (شرکت / فروشنده)</div>
+        <div class="grid-2">
+          <div class="form-field">
+            <label for="companyName">نام شرکت / فروشنده</label>
+            <input id="companyName" type="text" placeholder="مثال: شرکت نوآوران فناوری">
+          </div>
+          <div class="form-field">
+            <label for="companyPhone">تلفن</label>
+            <input id="companyPhone" type="text" placeholder="021-xxxxxxx">
+          </div>
+          <div class="form-field">
+            <label for="companyEmail">ایمیل</label>
+            <input id="companyEmail" type="email" placeholder="info@example.com">
+          </div>
+          <div class="form-field">
+            <label for="companyAddress">آدرس</label>
+            <input id="companyAddress" type="text" placeholder="تهران، ...">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- اطلاعات خریدار -->
+        <div class="section-title">اطلاعات خریدار</div>
+        <div class="grid-2">
+          <div class="form-field">
+            <label for="customerName">نام مشتری / شرکت</label>
+            <input id="customerName" type="text" placeholder="مثال: آقای محمدی">
+          </div>
+          <div class="form-field">
+            <label for="customerPhone">تلفن مشتری</label>
+            <input id="customerPhone" type="text" placeholder="09xx-xxx-xxxx">
+          </div>
+          <div class="form-field">
+            <label for="customerCode">شناسه / کد اقتصادی (اختیاری)</label>
+            <input id="customerCode" type="text" placeholder="اختیاری">
+          </div>
+          <div class="form-field">
+            <label for="customerAddress">آدرس مشتری</label>
+            <input id="customerAddress" type="text" placeholder="آدرس خریدار">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- متای فاکتور -->
+        <div class="section-title">مشخصات فاکتور</div>
+        <div class="grid-2 invoice-meta">
+          <div class="form-field">
+            <label for="invoiceNumber">شماره فاکتور</label>
+            <input id="invoiceNumber" type="text" placeholder="INV-1402-001">
+          </div>
+          <div class="form-field">
+            <label for="invoiceDate">تاریخ فاکتور</label>
+            <input id="invoiceDate" type="date">
+          </div>
+          <div class="form-field">
+            <label for="dueDate">تاریخ سررسید</label>
+            <input id="dueDate" type="date">
+          </div>
+          <div class="form-field">
+            <label for="taxPercent">مالیات (٪ روی کل)</label>
+            <input id="taxPercent" type="number" class="numeric" min="0" max="100" value="0">
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- جدول اقلام -->
+        <div class="items-section">
+          <div class="items-header">
+            <span class="section-title" style="margin:0;">اقلام فاکتور</span>
+            <button class="btn btn-outline" id="btnAddRow" type="button">
+              <span class="icon">➕</span>
+              ردیف جدید
+            </button>
+          </div>
+
+          <div class="items-table-wrapper">
+            <table id="itemsTable">
+              <thead>
+                <tr>
+                  <th style="width:40px;">#</th>
+                  <th>شرح</th>
+                  <th style="width:70px;">تعداد</th>
+                  <th style="width:100px;">قیمت واحد</th>
+                  <th style="width:70px;">تخفیف ٪</th>
+                  <th style="width:110px;">مبلغ ردیف</th>
+                  <th style="width:40px;"></th>
+                </tr>
+              </thead>
+              <tbody id="itemsTbody">
+                <!-- ردیف‌ها با JS اضافه می‌شوند -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="items-footer">
+            <span>مبالغ به تومان محاسبه می‌شوند.</span>
+            <button class="btn btn-danger" type="button" id="btnClearItems">
+              پاک کردن همه ردیف‌ها
+            </button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- توضیحات -->
+        <div class="form-field">
+          <label for="notes">توضیحات (اختیاری)</label>
+          <textarea id="notes" placeholder="شرایط پرداخت، توضیحات اضافی و ..."></textarea>
+        </div>
+      </section>
+
+      <!-- ستون پیش نمایش -->
+      <section class="invoice-preview" id="printArea">
+        <div class="preview-header">
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div class="logo-box" id="logoBox">
+              IN
+            </div>
+            <div class="company-preview">
+              <h3 id="prevCompanyName">شرکت شما</h3>
+              <p id="prevCompanyAddress">آدرس شرکت</p>
+              <p>
+                <span id="prevCompanyPhone">تلفن</span> ·
+                <span id="prevCompanyEmail">ایمیل</span>
+              </p>
+            </div>
+          </div>
+          <div class="invoice-label">
+            <strong>فاکتور فروش</strong>
+            <span id="prevInvoiceNumber">شماره: -</span>
+          </div>
+        </div>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span>تاریخ فاکتور:</span>
+            <span id="prevInvoiceDate">-</span>
+          </div>
+          <div class="meta-item">
+            <span>تاریخ سررسید:</span>
+            <span id="prevDueDate">-</span>
+          </div>
+          <div class="meta-item">
+            <span>مبلغ کل (با مالیات):</span>
+            <span id="prevGrandTotal">0 تومان</span>
+          </div>
+          <div class="meta-item">
+            <span>مالیات:</span>
+            <span id="prevTaxLine">بدون مالیات</span>
+          </div>
+        </div>
+
+        <div class="party-boxes">
+          <div class="party-card">
+            <h4>فروشنده</h4>
+            <p id="prevCompanyBlock">
+              شرکت شما<br>
+              آدرس شرکت<br>
+              تلفن · ایمیل
+            </p>
+          </div>
+          <div class="party-card">
+            <h4>خریدار</h4>
+            <p id="prevCustomerBlock">
+              نام مشتری<br>
+              تلفن<br>
+              آدرس
+            </p>
+          </div>
+        </div>
+
+        <div class="preview-items-table">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:40px;">#</th>
+                <th>شرح</th>
+                <th style="width:70px;">تعداد</th>
+                <th style="width:100px;">قیمت واحد</th>
+                <th style="width:80px;">تخفیف</th>
+                <th style="width:120px;">مبلغ ردیف</th>
+              </tr>
+            </thead>
+            <tbody id="prevItemsBody">
+              <tr>
+                <td colspan="6" style="text-align:center; color:var(--text-muted); padding:12px;">
+                  هنوز هیچ ردیفی اضافه نشده است.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="totals-box">
+          <div class="total-row">
+            <span>جمع جزء (قبل از تخفیف و مالیات)</span>
+            <span id="prevSubTotal">0 تومان</span>
+          </div>
+          <div class="total-row">
+            <span>جمع تخفیف ردیف‌ها</span>
+            <span id="prevDiscountTotal">0 تومان</span>
+          </div>
+          <div class="total-row">
+            <span>مالیات (٪ <span id="prevTaxPercent">0</span>)</span>
+            <span id="prevTaxAmount">0 تومان</span>
+          </div>
+          <div class="total-row total-main">
+            <span>مبلغ قابل پرداخت</span>
+            <span id="prevPayable">0 تومان</span>
+          </div>
+        </div>
+
+        <div class="note-box">
+          <strong>توضیحات:</strong>
+          <span id="prevNotes">-</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- فوتر پایین -->
+    <footer class="app-footer">
+      <div>
+        ساخته شده با HTML + CSS + JS — مناسب چاپ و ذخیره به صورت PDF
+      </div>
+      <div class="badge">
+        <span>✅</span>
+        <span>فاکتور تک‌صفحه‌ای حرفه‌ای</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // کمک‌تابع برای تبدیل عدد به فرمت تومان با جداکننده
+    function formatCurrency(value) {
+      const num = Number(value) || 0;
+      return num.toLocaleString('fa-IR') + ' تومان';
+    }
+
+    function formatNumber(value) {
+      const num = Number(value) || 0;
+      return num.toLocaleString('fa-IR');
+    }
+
+    // اضافه کردن ردیف جدید به جدول اقلام
+    const itemsTbody = document.getElementById('itemsTbody');
+
+    function createItemRow() {
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td class="item-number"></td>
+        <td>
+          <input type="text" class="item-input item-desc" placeholder="شرح کالا / خدمت">
+        </td>
+        <td>
+          <input type="number" min="0" step="1" class="item-input item-qty" value="1">
+        </td>
+        <td>
+          <input type="number" min="0" step="1000" class="item-input item-price" value="0">
+        </td>
+        <td>
+          <input type="number" min="0" max="100" step="1" class="item-input item-discount" value="0">
+        </td>
+        <td class="item-total-cell">
+          0
+        </td>
+        <td class="item-actions">
+          <button type="button" class="btn-icon btn-remove-row" title="حذف ردیف">✖</button>
+        </td>
+      `;
+
+      itemsTbody.appendChild(row);
+      updateRowNumbers();
+      attachRowEvents(row);
+      recalcTotals();
+    }
+
+    function updateRowNumbers() {
+      const rows = itemsTbody.querySelectorAll('tr');
+      rows.forEach((row, index) => {
+        const numCell = row.querySelector('.item-number');
+        if (numCell) numCell.textContent = index + 1;
+      });
+    }
+
+    function attachRowEvents(row) {
+      const qty = row.querySelector('.item-qty');
+      const price = row.querySelector('.item-price');
+      const discount = row.querySelector('.item-discount');
+      const desc = row.querySelector('.item-desc');
+      const removeBtn = row.querySelector('.btn-remove-row');
+
+      [qty, price, discount, desc].forEach(el => {
+        el.addEventListener('input', () => {
+          recalcTotals();
+        });
+      });
+
+      removeBtn.addEventListener('click', () => {
+        row.remove();
+        updateRowNumbers();
+        recalcTotals();
+      });
+    }
+
+    function recalcTotals() {
+      const rows = itemsTbody.querySelectorAll('tr');
+      let subTotal = 0;
+      let discountTotal = 0;
+
+      // اگر هیچ ردیفی نیست، پیش‌نمایش را خالی کن
+      const prevItemsBody = document.getElementById('prevItemsBody');
+      prevItemsBody.innerHTML = '';
+
+      if (rows.length === 0) {
+        prevItemsBody.innerHTML = `
+          <tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:12px;">
+            هنوز هیچ ردیفی اضافه نشده است.
+          </td></tr>`;
+      }
+
+      rows.forEach((row, idx) => {
+        const desc = row.querySelector('.item-desc').value.trim();
+        const qty = Number(row.querySelector('.item-qty').value) || 0;
+        const price = Number(row.querySelector('.item-price').value) || 0;
+        const discountPercent = Number(row.querySelector('.item-discount').value) || 0;
+
+        const lineBase = qty * price;
+        const lineDiscount = lineBase * (discountPercent / 100);
+        const lineTotal = lineBase - lineDiscount;
+
+        subTotal += lineBase;
+        discountTotal += lineDiscount;
+
+        const totalCell = row.querySelector('.item-total-cell');
+        if (totalCell) {
+          totalCell.textContent = formatCurrency(lineTotal);
+        }
+
+        // ساخت ردیف پیش‌نمایش
+        const trPrev = document.createElement('tr');
+        trPrev.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${desc || '-'}</td>
+          <td>${formatNumber(qty)}</td>
+          <td>${formatCurrency(price)}</td>
+          <td>${discountPercent ? discountPercent + '٪' : '-'}</td>
+          <td>${formatCurrency(lineTotal)}</td>
+        `;
+        prevItemsBody.appendChild(trPrev);
+      });
+
+      const taxPercentInput = document.getElementById('taxPercent');
+      const taxPercent = Number(taxPercentInput.value) || 0;
+
+      const taxableAmount = subTotal - discountTotal;
+      const taxAmount = taxableAmount * (taxPercent / 100);
+      const payable = taxableAmount + taxAmount;
+
+      // آپدیت بخش جمع‌ها در پیش‌نمایش
+      document.getElementById('prevSubTotal').textContent = formatCurrency(subTotal);
+      document.getElementById('prevDiscountTotal').textContent = formatCurrency(discountTotal);
+      document.getElementById('prevTaxPercent').textContent = taxPercent;
+      document.getElementById('prevTaxAmount').textContent = formatCurrency(taxAmount);
+      document.getElementById('prevPayable').textContent = formatCurrency(payable);
+      document.getElementById('prevGrandTotal').textContent = formatCurrency(payable);
+      document.getElementById('prevTaxLine').textContent =
+        taxPercent > 0
+          ? formatCurrency(taxAmount) + ' (٪' + taxPercent + ')'
+          : 'بدون مالیات';
+
+      // بروزرسانی سایر اطلاعات پیش‌نمایش
+      syncPreview();
+    }
+
+    function syncPreview() {
+      const companyName = document.getElementById('companyName').value.trim() || 'شرکت شما';
+      const companyPhone = document.getElementById('companyPhone').value.trim() || 'تلفن';
+      const companyEmail = document.getElementById('companyEmail').value.trim() || 'ایمیل';
+      const companyAddress = document.getElementById('companyAddress').value.trim() || 'آدرس شرکت';
+
+      const customerName = document.getElementById('customerName').value.trim() || 'نام مشتری';
+      const customerPhone = document.getElementById('customerPhone').value.trim() || 'تلفن';
+      const customerAddress = document.getElementById('customerAddress').value.trim() || 'آدرس';
+
+      const invoiceNumber = document.getElementById('invoiceNumber').value.trim() || '-';
+      const invoiceDate = document.getElementById('invoiceDate').value || '-';
+      const dueDate = document.getElementById('dueDate').value || '-';
+      const notes = document.getElementById('notes').value.trim() || '-';
+
+      document.getElementById('prevCompanyName').textContent = companyName;
+      document.getElementById('prevCompanyAddress').textContent = companyAddress;
+      document.getElementById('prevCompanyPhone').textContent = companyPhone;
+      document.getElementById('prevCompanyEmail').textContent = companyEmail;
+      document.getElementById('prevInvoiceNumber').textContent = 'شماره: ' + invoiceNumber;
+      document.getElementById('prevInvoiceDate').textContent = invoiceDate;
+      document.getElementById('prevDueDate').textContent = dueDate;
+
+      document.getElementById('prevCompanyBlock').innerHTML =
+        companyName + '<br>' +
+        companyAddress + '<br>' +
+        companyPhone + ' · ' + companyEmail;
+
+      document.getElementById('prevCustomerBlock').innerHTML =
+        customerName + '<br>' +
+        customerPhone + '<br>' +
+        customerAddress;
+
+      document.getElementById('prevNotes').textContent = notes;
+
+      // حروف اول لوگو
+      const logoBox = document.getElementById('logoBox');
+      if (companyName !== 'شرکت شما') {
+        const firstLetters = companyName
+          .split(' ')
+          .filter(Boolean)
+          .slice(0, 2)
+          .map(w => w[0])
+          .join('')
+          .toUpperCase();
+        logoBox.textContent = firstLetters || 'IN';
+      } else {
+        logoBox.textContent = 'IN';
+      }
+    }
+
+    // رویدادها برای همه اینپوت‌ها جهت بروزرسانی پیش‌نمایش
+    const fieldsToSync = [
+      'companyName', 'companyPhone', 'companyEmail', 'companyAddress',
+      'customerName', 'customerPhone', 'customerCode', 'customerAddress',
+      'invoiceNumber', 'invoiceDate', 'dueDate', 'taxPercent', 'notes'
+    ];
+
+    fieldsToSync.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          if (id === 'taxPercent') {
+            recalcTotals();
+          } else {
+            syncPreview();
+          }
+        });
+      }
+    });
+
+    // دکمه‌ها
+    document.getElementById('btnAddRow').addEventListener('click', () => {
+      createItemRow();
+    });
+
+    document.getElementById('btnClearItems').addEventListener('click', () => {
+      if (confirm('همه ردیف‌ها حذف شوند؟')) {
+        itemsTbody.innerHTML = '';
+        recalcTotals();
+      }
+    });
+
+    document.getElementById('btnPrint').addEventListener('click', () => {
+      window.print();
+    });
+
+    document.getElementById('btnNewInvoice').addEventListener('click', () => {
+      if (!confirm('فاکتور فعلی پاک شود و فاکتور جدید شروع شود؟')) return;
+
+      // پاک کردن فرم‌ها
+      document.querySelectorAll('input, textarea').forEach(el => {
+        if (el.type === 'date' || el.type === 'number' || el.type === 'text' || el.type === 'email') {
+          if (el.id === 'taxPercent') {
+            el.value = 0;
+          } else {
+            el.value = '';
+          }
+        } else if (el.tagName.toLowerCase() === 'textarea') {
+          el.value = '';
+        }
+      });
+
+      // ردیف‌ها
+      itemsTbody.innerHTML = '';
+      createItemRow(); // حداقل یک ردیف خالی
+      recalcTotals();
+    });
+
+    // شروع اولیه: یک ردیف اضافه و sync اولیه
+    createItemRow();
+    syncPreview();
+  </script>
+</body>
+</html>

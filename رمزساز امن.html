@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>رمزساز امن - حرفه‌ای</title>
+  <style>
+    :root {
+      /* رنگ‌های حالت تاریک (پیش‌فرض) */
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #60a5fa;
+      --border-color: #334155;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.25);
+      --radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    .light-mode {
+      /* رنگ‌های حالت روشن */
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-input: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #60a5fa;
+      --border-color: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Vazirmatn', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: var(--transition);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .app {
+      background: var(--bg-secondary);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px var(--shadow);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+    }
+
+    .app-header {
+      padding: 24px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .title-section h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-section p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      background: var(--accent-primary);
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .controls-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-input);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid var(--border-color);
+    }
+
+    .theme-toggle:hover {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .theme-toggle span {
+      font-size: 0.9rem;
+    }
+
+    .app-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .app-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 4px 12px var(--shadow);
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+    }
+
+    .card-header {
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .range-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .range-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 10px;
+      background: var(--bg-input);
+      outline: none;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      cursor: pointer;
+      border: 2px solid white;
+      box-shadow: 0 2px 5px var(--shadow);
+    }
+
+    .range-value {
+      width: 50px;
+      padding: 6px;
+      text-align: center;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .checkbox-group {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-item input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-primary);
+    }
+
+    .checkbox-item label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.9rem;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .count-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .count-input label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .count-input input {
+      width: 60px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .password-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .password-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      transition: var(--transition);
+    }
+
+    .password-item:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .password-text {
+      flex: 1;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      word-break: break-all;
+      direction: ltr;
+      text-align: left;
+    }
+
+    .password-strength {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .strength-weak {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .strength-medium {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .strength-strong {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .strength-very-strong {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-primary);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .copy-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-primary);
+      color: white;
+      border-color: var(--accent-primary);
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.85rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .app-footer {
+      padding: 16px 24px;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .entropy-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .entropy-value {
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="app">
+      <header class="app-header">
+        <div class="title-section">
+          <h1>
+            رمزساز امن
+            <span class="badge">حرفه‌ای</span>
+          </h1>
+          <p>تولید رمزهای عبور قوی و تصادفی با امنیت کامل</p>
+        </div>
+        <div class="controls-section">
+          <div class="theme-toggle" id="themeToggle">
+            <span>حالت روشن</span>
+            <span>🌙</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="app-body">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">تنظیمات رمز</h2>
+            <p class="card-subtitle">طول و نوع کاراکترها را تنظیم کنید</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">طول رمز: <span id="lengthValue">16</span> کاراکتر</label>
+            <div class="range-container">
+              <input type="range" id="lengthRange" class="range-slider" min="8" max="64" value="16">
+              <input type="number" id="lengthInput" class="range-value" min="8" max="64" value="16">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">نوع کاراکترها</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="optLower" checked>
+                <label for="optLower">حروف کوچک (a-z)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="optUpper" checked>
+                <label for="optUpper">حروف بزرگ (A-Z)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="optDigits" checked>
+                <label for="optDigits">اعداد (0-9)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="optSymbols" checked>
+                <label for="optSymbols">نمادها (!@#$...)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="optAvoidAmbiguous">
+                <label for="optAvoidAmbiguous">حذف کاراکترهای مبهم</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button id="generateBtn" class="btn btn-primary">
+              <span>⚡</span>
+              تولید رمزهای جدید
+            </button>
+            <div class="count-input">
+              <label for="countInput">تعداد:</label>
+              <input type="number" id="countInput" min="1" max="10" value="5">
+            </div>
+          </div>
+
+          <div id="errorMessage" class="error-message"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">رمزهای تولید شده</h2>
+            <p class="card-subtitle">برای کپی روی دکمه مربوطه کلیک کنید</p>
+          </div>
+          <div id="passwordList" class="password-list">
+            <!-- رمزها اینجا نمایش داده می‌شوند -->
+          </div>
+        </div>
+      </div>
+
+      <footer class="app-footer">
+        <div class="entropy-info">
+          <span>امنیت: </span>
+          <span class="entropy-value" id="entropyValue">-- بیت</span>
+        </div>
+        <div>
+          تمام عملیات به صورت محلی در مرورگر شما انجام می‌شود و هیچ اطلاعاتی ارسال نمی‌شود
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // عناصر DOM
+      const themeToggle = document.getElementById('themeToggle');
+      const lengthRange = document.getElementById('lengthRange');
+      const lengthInput = document.getElementById('lengthInput');
+      const lengthValue = document.getElementById('lengthValue');
+      const generateBtn = document.getElementById('generateBtn');
+      const countInput = document.getElementById('countInput');
+      const passwordList = document.getElementById('passwordList');
+      const errorMessage = document.getElementById('errorMessage');
+      const entropyValue = document.getElementById('entropyValue');
+      
+      // تنظیمات کاراکترها
+      const optLower = document.getElementById('optLower');
+      const optUpper = document.getElementById('optUpper');
+      const optDigits = document.getElementById('optDigits');
+      const optSymbols = document.getElementById('optSymbols');
+      const optAvoidAmbiguous = document.getElementById('optAvoidAmbiguous');
+      
+      // کاراکترهای مبهم
+      const ambiguousChars = ['0', 'O', '1', 'l', 'I'];
+      
+      // تغییر حالت تاریک/روشن
+      themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('light-mode');
+        const isLightMode = document.body.classList.contains('light-mode');
+        themeToggle.innerHTML = isLightMode 
+          ? '<span>حالت تاریک</span><span>☀️</span>' 
+          : '<span>حالت روشن</span><span>🌙</span>';
+      });
+      
+      // همگام‌سازی اسلایدر و ورودی عددی
+      function syncLength() {
+        const value = lengthRange.value;
+        lengthInput.value = value;
+        lengthValue.textContent = value;
+      }
+      
+      lengthRange.addEventListener('input', syncLength);
+      lengthInput.addEventListener('input', function() {
+        let value = parseInt(this.value);
+        if (isNaN(value) || value < 8) value = 8;
+        if (value > 64) value = 64;
+        this.value = value;
+        lengthRange.value = value;
+        lengthValue.textContent = value;
+      });
+      
+      // نمایش خطا
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.classList.add('show');
+      }
+      
+      // پاک کردن خطا
+      function clearError() {
+        errorMessage.textContent = '';
+        errorMessage.classList.remove('show');
+      }
+      
+      // تولید رمز عبور
+      function generatePassword(length) {
+        // تعریف کاراکترها
+        let lowerChars = 'abcdefghijklmnopqrstuvwxyz';
+        let upperChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let digitChars = '0123456789';
+        let symbolChars = '!@#$%^&*()-_=+[]{};:,.<>?/\\|~';
+        
+        // حذف کاراکترهای مبهم در صورت فعال بودن گزینه
+        if (optAvoidAmbiguous.checked) {
+          lowerChars = lowerChars.split('').filter(c => !ambiguousChars.includes(c)).join('');
+          upperChars = upperChars.split('').filter(c => !ambiguousChars.includes(c)).join('');
+          digitChars = digitChars.split('').filter(c => !ambiguousChars.includes(c)).join('');
+          symbolChars = symbolChars.split('').filter(c => !ambiguousChars.includes(c)).join('');
+        }
+        
+        // مجموعه کاراکترهای فعال
+        const charSets = [];
+        if (optLower.checked && lowerChars) charSets.push(lowerChars);
+        if (optUpper.checked && upperChars) charSets.push(upperChars);
+        if (optDigits.checked && digitChars) charSets.push(digitChars);
+        if (optSymbols.checked && symbolChars) charSets.push(symbolChars);
+        
+        // بررسی حداقل یک مجموعه انتخاب شده
+        if (charSets.length === 0) {
+          throw new Error('حداقل یک نوع کاراکتر را انتخاب کنید');
+        }
+        
+        // ایجاد مجموعه کامل کاراکترها
+        const allChars = charSets.join('');
+        
+        // اطمینان از وجود حداقل یک کاراکتر از هر مجموعه انتخاب شده
+        let password = '';
+        for (const set of charSets) {
+          const randomIndex = Math.floor(Math.random() * set.length);
+          password += set[randomIndex];
+        }
+        
+        // تکمیل رمز عبور تا طول مورد نظر
+        const remainingLength = length - password.length;
+        for (let i = 0; i < remainingLength; i++) {
+          const randomIndex = Math.floor(Math.random() * allChars.length);
+          password += allChars[randomIndex];
+        }
+        
+        // به هم ریختن ترتیب کاراکترها
+        return password.split('').sort(() => 0.5 - Math.random()).join('');
+      }
+      
+      // تخمین قدرت رمز
+      function estimateStrength(password) {
+        if (!password) return { entropy: 0, label: 'خالی', className: 'strength-weak' };
+        
+        // تشخیص نوع کاراکترهای استفاده شده
+        const hasLower = /[a-z]/.test(password);
+        const hasUpper = /[A-Z]/.test(password);
+        const hasDigit = /[0-9]/.test(password);
+        const hasSymbol = /[^A-Za-z0-9]/.test(password);
+        
+        // محاسبه اندازه مجموعه کاراکترها
+        let charsetSize = 0;
+        if (hasLower) charsetSize += 26;
+        if (hasUpper) charsetSize += 26;
+        if (hasDigit) charsetSize += 10;
+        if (hasSymbol) charsetSize += 32;
+        
+        // محاسبه آنتروپی
+        const entropy = password.length * Math.log2(charsetSize);
+        
+        // تعیین سطح قدرت
+        let label, className;
+        if (entropy < 40) {
+          label = 'ضعیف';
+          className = 'strength-weak';
+        } else if (entropy < 60) {
+          label = 'متوسط';
+          className = 'strength-medium';
+        } else if (entropy < 80) {
+          label = 'قوی';
+          className = 'strength-strong';
+        } else {
+          label = 'خیلی قوی';
+          className = 'strength-very-strong';
+        }
+        
+        return { entropy, label, className };
+      }
+      
+      // ایجاد ردیف رمز عبور
+      function createPasswordRow(password) {
+        const { entropy, label, className } = estimateStrength(password);
+        
+        const item = document.createElement('div');
+        item.className = 'password-item';
+        
+        const text = document.createElement('div');
+        text.className = 'password-text';
+        text.textContent = password;
+        
+        const strength = document.createElement('div');
+        strength.className = `password-strength ${className}`;
+        strength.textContent = `${label} (${entropy.toFixed(1)} بیت)`;
+        
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.innerHTML = '<span>📋</span> کپی';
+        
+        // رویداد کپی کردن
+        copyBtn.addEventListener('click', function() {
+          navigator.clipboard.writeText(password).then(() => {
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span>✅</span> کپی شد!';
+            setTimeout(() => {
+              copyBtn.innerHTML = originalHTML;
+            }, 1500);
+          }).catch(() => {
+            // روش جایگزین برای مرورگرهای قدیمی
+            const textArea = document.createElement('textarea');
+            textArea.value = password;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            const originalHTML = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span>✅</span> کپی شد!';
+            setTimeout(() => {
+              copyBtn.innerHTML = originalHTML;
+            }, 1500);
+          });
+        });
+        
+        item.appendChild(text);
+        item.appendChild(strength);
+        item.appendChild(copyBtn);
+        
+        return item;
+      }
+      
+      // تولید رمزهای عبور
+      function generatePasswords() {
+        clearError();
+        passwordList.innerHTML = '';
+        
+        const length = parseInt(lengthInput.value);
+        const count = parseInt(countInput.value);
+        
+        // اعتبارسنجی ورودی‌ها
+        if (isNaN(length) || length < 8 || length > 64) {
+          showError('طول رمز باید بین ۸ تا ۶۴ کاراکتر باشد');
+          return;
+        }
+        
+        if (isNaN(count) || count < 1 || count > 10) {
+          showError('تعداد رمزها باید بین ۱ تا ۱۰ باشد');
+          return;
+        }
+        
+        try {
+          let totalEntropy = 0;
+          
+          for (let i = 0; i < count; i++) {
+            const password = generatePassword(length);
+            const row = createPasswordRow(password);
+            passwordList.appendChild(row);
+            
+            const { entropy } = estimateStrength(password);
+            totalEntropy += entropy;
+          }
+          
+          // نمایش میانگین آنتروپی
+          const avgEntropy = totalEntropy / count;
+          entropyValue.textContent = `${avgEntropy.toFixed(1)} بیت`;
+        } catch (error) {
+          showError(error.message);
+        }
+      }
+      
+      // رویداد کلیک دکمه تولید
+      generateBtn.addEventListener('click', generatePasswords);
+      
+      // تولید اولیه رمزها
+      generatePasswords();
+    });
+  </script>
+</body>
+</html>
