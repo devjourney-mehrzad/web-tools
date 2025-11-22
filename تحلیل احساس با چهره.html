@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>تشخیص احساس از چهره</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0b0614, #02010a);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1120px;
+      background: rgba(15, 10, 25, 0.96);
+      border-radius: 26px;
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(55, 65, 81, 0.6);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.4fr);
+      gap: 24px;
+      backdrop-filter: blur(22px);
+    }
+
+    @media (max-width: 880px) {
+      .app {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .left {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .head-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .head-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .head-main h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .head-main span {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
+    .pill {
+      font-size: 0.7rem;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(248, 250, 252, 0.14);
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(236, 72, 153, 0.2));
+      color: #fde68a;
+      white-space: nowrap;
+    }
+
+    .camera-shell {
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      background: radial-gradient(circle at top left, #f9731622, #ec489922, #111827ff);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.9),
+        0 25px 70px rgba(0, 0, 0, 0.9);
+      aspect-ratio: 4 / 3;
+    }
+
+    .camera-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at bottom right, rgba(56, 189, 248, 0), rgba(248, 250, 252, 0.05));
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    video,
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    video {
+      transform: scaleX(-1);
+    }
+
+    canvas {
+      transform: scaleX(-1);
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: #f97316;
+      box-shadow: 0 0 16px rgba(249, 115, 22, 0.95);
+    }
+
+    .dot.ready {
+      background: #facc15;
+      box-shadow: 0 0 18px rgba(250, 204, 21, 1);
+    }
+
+    .status-extra {
+      font-size: 0.78rem;
+      color: #e5e7eb;
+      opacity: 0.85;
+    }
+
+    .right {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 22px;
+      background: radial-gradient(circle at top right, #f973161a, #111827);
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75);
+    }
+
+    .right h2 {
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .right p {
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+
+    .emotion-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(55, 14, 48, 0.98));
+      border: 1px solid rgba(248, 250, 252, 0.09);
+    }
+
+    .emotion-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .emotion-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .emotion-detail {
+      font-size: 0.85rem;
+      color: #d1d5db;
+    }
+
+    .emotion-emoji {
+      font-size: 2.6rem;
+      filter:
+        drop-shadow(0 12px 28px rgba(0, 0, 0, 0.9))
+        drop-shadow(0 0 18px rgba(252, 211, 77, 0.8));
+      min-width: 3rem;
+      text-align: center;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .chip {
+      font-size: 0.76rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      color: #e5e7eb;
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(76, 29, 149, 0.18));
+    }
+
+    .history {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(75, 85, 99, 0.9);
+      font-size: 0.8rem;
+      color: #9ca3af;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .history::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .history::-webkit-scrollbar-thumb {
+      background: rgba(75, 85, 99, 0.95);
+      border-radius: 999px;
+    }
+
+    .history-entry {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 3px 0;
+    }
+
+    .history-entry span:first-child {
+      opacity: 0.85;
+    }
+
+    .hint {
+      margin-top: auto;
+      font-size: 0.76rem;
+      color: #6b7280;
+    }
+
+    .hint code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.72rem;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: #e5e7eb;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+</head>
+<body>
+  <main class="app">
+    <section class="left">
+      <div class="head-row">
+        <div class="head-main">
+          <h1>تحلیل زنده‌ی احساس چهره</h1>
+          <span>وب‌کم خودت، حس واقعی خودت</span>
+        </div>
+        <div class="pill">HTML · CSS · JS · face-api.js</div>
+      </div>
+
+      <div class="camera-shell">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-left">
+          <div id="statusDot" class="dot"></div>
+          <span id="statusText">در حال دسترسی به وب‌کم...</span>
+        </div>
+        <div class="status-extra">لبخند، اخم یا حالت عادی صورت را تست کن</div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div>
+        <h2>حالت چهره‌ی فعلی</h2>
+        <p>وقتی در قاب قرار می‌گیری، مدل روی فریم‌های ویدیو کار می‌کند و احساس غالب تو را پیدا می‌کند.</p>
+      </div>
+
+      <div class="emotion-card">
+        <div class="emotion-text">
+          <div class="emotion-title" id="emotionLabel">در حال آماده‌سازی...</div>
+          <div class="emotion-detail" id="emotionDetail">تا چند لحظه دیگر، اولین حس از چهره‌ات خوانده می‌شود.</div>
+        </div>
+        <div class="emotion-emoji" id="emotionEmoji">⌛</div>
+      </div>
+
+      <div class="chips">
+        <div class="chip">😊 خوشحال: وقتی لبخند عمیق روی صورتت است</div>
+        <div class="chip">😠 عصبانی: وقتی ابروها درهم و اخم داری</div>
+        <div class="chip">😐 خنثی: حالت عادی بدون احساس خاص</div>
+        <div class="chip">😮 متعجب، 😢 غمگین و بقیه هم پشتیبانی می‌شوند</div>
+      </div>
+
+      <div class="history" id="history"></div>
+
+      <div class="hint">
+        برای کارکردن وب‌کم، صفحه را از روی یک سرور ساده مثل <code>http://localhost</code> یا هر هاست معمولی باز کن؛
+        باز کردن مستقیم با <code>file://</code> ممکن است دسترسی دوربین را ببندد.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("overlay");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const emotionLabel = document.getElementById("emotionLabel");
+    const emotionDetail = document.getElementById("emotionDetail");
+    const emotionEmoji = document.getElementById("emotionEmoji");
+    const historyBox = document.getElementById("history");
+
+    const MODEL_URL = "./models";
+
+    let currentEmotionKey = null;
+    let detectionIntervalId = null;
+
+    function mapExpression(key) {
+      if (key === "happy") {
+        return {
+          title: "خوشحال",
+          detail: "لبخند واضح روی چهره‌ات تشخیص داده شد.",
+          emoji: "😊"
+        };
+      }
+      if (key === "angry") {
+        return {
+          title: "عصبانی",
+          detail: "الگوی اخم و تنش در ناحیه‌ی ابرو و دهان دیده می‌شود.",
+          emoji: "😠"
+        };
+      }
+      if (key === "neutral") {
+        return {
+          title: "خنثی",
+          detail: "چهره‌ات آرام و بدون احساس غالب خاصی است.",
+          emoji: "😐"
+        };
+      }
+      if (key === "sad") {
+        return {
+          title: "غمگین",
+          detail: "پایین بودن گوشه‌های لب و حالت گرفته‌ی صورت تشخیص داده شد.",
+          emoji: "😢"
+        };
+      }
+      if (key === "surprised") {
+        return {
+          title: "متعجب",
+          detail: "چشمان بازتر و تغییر ناگهانی فرم صورت دیده می‌شود.",
+          emoji: "😮"
+        };
+      }
+      if (key === "fearful") {
+        return {
+          title: "نگران / ترسیده",
+          detail: "ترکیبی از استرس و کشیدگی صورت ثبت شده است.",
+          emoji: "😨"
+        };
+      }
+      if (key === "disgusted") {
+        return {
+          title: "متنفر",
+          detail: "الگوی چهره نشان‌دهنده‌ی عدم رضایت شدید است.",
+          emoji: "🤮"
+        };
+      }
+      return {
+        title: "نامشخص",
+        detail: "حالت چهره واضح و پایدار نیست؛ کمی نزدیک‌تر و در نور بهتر قرار بگیر.",
+        emoji: "❔"
+      };
+    }
+
+    function addHistory(entry) {
+      const time = new Date().toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+      const row = document.createElement("div");
+      row.className = "history-entry";
+      const left = document.createElement("span");
+      left.textContent = time;
+      const right = document.createElement("span");
+      right.textContent = entry;
+      row.appendChild(left);
+      row.appendChild(right);
+      historyBox.prepend(row);
+    }
+
+    async function loadModels() {
+      statusText.textContent = "در حال بارگذاری مدل‌ پردازش تصویر...";
+      await Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
+      ]);
+      statusText.textContent = "مدل‌ها آماده‌اند؛ در حال گرفتن تصویر از دوربین...";
+    }
+
+    async function startVideo() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          },
+          audio: false
+        });
+        video.srcObject = stream;
+      } catch (error) {
+        statusText.textContent = "دسترسی به دوربین رد شد یا دوربین در دسترس نیست.";
+        emotionLabel.textContent = "دسترسی به دوربین ناموفق";
+        emotionDetail.textContent = "اجازه‌ی استفاده از دوربین را به مرورگر بده یا یک دوربین فیزیکی متصل کن.";
+        emotionEmoji.textContent = "🚫";
+        throw error;
+      }
+    }
+
+    function setupCanvas() {
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+      canvas.width = width;
+      canvas.height = height;
+      const size = { width, height };
+      faceapi.matchDimensions(canvas, size);
+      return size;
+    }
+
+    function startDetectionLoop(displaySize) {
+      const ctx = canvas.getContext("2d");
+      statusDot.classList.add("ready");
+      statusText.textContent = "همه‌چیز آماده است؛ در حال تحلیل زنده‌ی احساس چهره.";
+
+      if (detectionIntervalId) {
+        clearInterval(detectionIntervalId);
+      }
+
+      detectionIntervalId = setInterval(async () => {
+        const detections = await faceapi
+          .detectSingleFace(
+            video,
+            new faceapi.TinyFaceDetectorOptions({
+              inputSize: 224,
+              scoreThreshold: 0.5
+            })
+          )
+          .withFaceExpressions();
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (!detections) {
+          emotionLabel.textContent = "چهره‌ای یافت نشد";
+          emotionDetail.textContent = "صورتت را کامل در کادر قرار بده و نور محیط را کمی بیشتر کن.";
+          emotionEmoji.textContent = "👀";
+          return;
+        }
+
+        const resized = faceapi.resizeResults(detections, displaySize);
+        faceapi.draw.drawDetections(canvas, resized);
+
+        const expressions = detections.expressions;
+        let bestKey = "neutral";
+        let bestVal = 0;
+        for (const key in expressions) {
+          if (Object.prototype.hasOwnProperty.call(expressions, key)) {
+            const val = expressions[key];
+            if (val > bestVal) {
+              bestVal = val;
+              bestKey = key;
+            }
+          }
+        }
+
+        const mapped = mapExpression(bestKey);
+        emotionLabel.textContent = mapped.title;
+        emotionDetail.textContent = mapped.detail;
+        emotionEmoji.textContent = mapped.emoji;
+
+        if (bestVal > 0.6 && currentEmotionKey !== bestKey) {
+          currentEmotionKey = bestKey;
+          addHistory(mapped.title + " " + mapped.emoji);
+        }
+      }, 260);
+    }
+
+    async function init() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        statusText.textContent = "این مرورگر از دسترسی مستقیم به دوربین پشتیبانی نمی‌کند.";
+        emotionLabel.textContent = "عدم پشتیبانی";
+        emotionDetail.textContent = "از مرورگرهای جدید مثل Chrome یا Edge استفاده کن.";
+        emotionEmoji.textContent = "⚠️";
+        return;
+      }
+
+      try {
+        await loadModels();
+        await startVideo();
+      } catch {
+        return;
+      }
+
+      video.addEventListener("playing", () => {
+        setTimeout(() => {
+          const size = setupCanvas();
+          startDetectionLoop(size);
+        }, 450);
+      });
+    }
+
+    init();
+  </script>
+</body>
+</html>
