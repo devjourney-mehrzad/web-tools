@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>مبدّل گفتار به متن پیشرفته</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #0f1420;
+      --bg-tertiary: #151a28;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-tertiary: #ec4899;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --border-subtle: rgba(148, 163, 184, 0.12);
+      --border-medium: rgba(148, 163, 184, 0.25);
+      --glow-primary: rgba(99, 102, 241, 0.4);
+      --glow-secondary: rgba(139, 92, 246, 0.3);
+    }
+
+    body.dark {
+      --bg-primary: #030712;
+      --bg-secondary: #0a0e1a;
+      --accent-primary: #06b6d4;
+      --accent-secondary: #0ea5e9;
+      --glow-primary: rgba(6, 182, 212, 0.35);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.85);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.15);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(1.4);
+        opacity: 0;
+      }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1420 100%);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* پس‌زمینه انیمیشن دار */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.06) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* هدر با افکت گلس */
+    .header {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.08) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-medium);
+      border-radius: 24px;
+      padding: 16px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      animation: shimmer 3s infinite;
+    }
+
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 
+        0 0 20px var(--glow-primary),
+        0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 
+        0 0 30px var(--glow-primary),
+        0 8px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
+    }
+
+    .title-group h1 {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .title-group p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 24px;
+      font-size: 12px;
+      color: var(--success);
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse-ring 2s infinite;
+    }
+
+    /* دکمه تم با انیمیشن */
+    .theme-toggle {
+      width: 56px;
+      height: 32px;
+      background: rgba(15, 20, 32, 0.6);
+      border: 1px solid var(--border-medium);
+      border-radius: 24px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s ease;
+      padding: 4px;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 12px var(--glow-primary);
+    }
+
+    .theme-toggle-slider {
+      position: absolute;
+      top: 4px;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 50%;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    body:not(.dark) .theme-toggle-slider {
+      right: 4px;
+    }
+
+    body.dark .theme-toggle-slider {
+      left: 4px;
+    }
+
+    /* محتوای اصلی */
+    .main-content {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      flex: 1;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .card {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-medium);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-medium);
+      box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--accent-primary),
+        transparent
+      );
+      opacity: 0.5;
+    }
+
+    .card-header {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--accent-primary);
+      font-weight: 500;
+    }
+
+    /* تنظیمات */
+    .settings {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .setting-group {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .setting-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(15, 20, 32, 0.6);
+      border: 1px solid var(--border-medium);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    select:hover {
+      border-color: var(--accent-primary);
+    }
+
+    select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--glow-primary);
+    }
+
+    .checkbox-group {
+      display: flex;
+      gap: 12px;
+      flex-direction: column;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .checkbox-item:hover {
+      color: var(--text-primary);
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-primary);
+      cursor: pointer;
+    }
+
+    /* ناحیه متن */
+    .textarea-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 280px;
+      padding: 16px;
+      background: rgba(10, 14, 26, 0.6);
+      border: 1px solid var(--border-medium);
+      border-radius: 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.8;
+      resize: vertical;
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    textarea:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 
+        0 0 0 3px var(--glow-primary),
+        0 8px 24px rgba(0, 0, 0, 0.3);
+      background: rgba(10, 14, 26, 0.8);
+    }
+
+    textarea[dir="ltr"] {
+      text-align: left;
+      direction: ltr;
+    }
+
+    /* اطلاعات و دکمه‌ها */
+    .textarea-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(15, 20, 32, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* دکمه‌های عمومی */
+    .btn {
+      padding: 10px 18px;
+      background: rgba(15, 20, 32, 0.6);
+      border: 1px solid var(--border-medium);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      outline: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 4px 16px var(--glow-primary);
+    }
+
+    .btn:hover::before {
+      opacity: 0.1;
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-color: transparent;
+      box-shadow: 0 4px 16px var(--glow-primary);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 24px var(--glow-primary);
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    .btn-danger {
+      border-color: rgba(239, 68, 68, 0.5);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      border-color: var(--danger);
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* کنترل میکروفن */
+    .mic-control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 0;
+    }
+
+    .mic-button {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border: none;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 8px 32px var(--glow-primary),
+        0 0 0 0 var(--glow-primary);
+    }
+
+    .mic-button:hover {
+      transform: scale(1.05);
+      box-shadow: 
+        0 12px 40px var(--glow-primary),
+        0 0 0 8px rgba(99, 102, 241, 0.2);
+    }
+
+    .mic-button.active {
+      animation: pulse-ring 1.5s infinite;
+      box-shadow: 
+        0 12px 40px var(--glow-primary),
+        0 0 0 0 var(--glow-primary);
+    }
+
+    .mic-button::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .mic-icon {
+      width: 40px;
+      height: 40px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .mic-capsule {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px 8px 0 0;
+    }
+
+    .mic-stand {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+    }
+
+    .mic-base {
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 28px;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 2px;
+    }
+
+    .status-display {
+      text-align: center;
+    }
+
+    .status-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .status-text strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .hint-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hint-text code {
+      padding: 2px 6px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 4px;
+      font-size: 11px;
+      color: var(--accent-primary);
+    }
+
+    /* بخش اطلاعات */
+    .info-section {
+      margin-bottom: 24px;
+    }
+
+    .info-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+
+    .tag:hover {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.4);
+      color: var(--accent-primary);
+    }
+
+    .tips-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .tips-list li {
+      padding: 8px 0;
+      padding-right: 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      position: relative;
+    }
+
+    .tips-list li::before {
+      content: '◆';
+      position: absolute;
+      right: 0;
+      color: var(--accent-primary);
+      font-size: 10px;
+    }
+
+    /* هشدار */
+    .alert {
+      padding: 12px 16px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 12px;
+      color: var(--danger);
+      font-size: 12px;
+      margin-top: 16px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    .alert.show {
+      display: block;
+      animation: fadeInUp 0.3s ease-out;
+    }
+
+    /* Toast اعلان */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      padding: 12px 24px;
+      background: rgba(15, 20, 32, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border-medium);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      color: var(--text-primary);
+      font-size: 13px;
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px var(--glow-primary);
+    }
+
+    /* ریسپانسیو */
+    @media (max-width: 1024px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+
+      .header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .settings {
+        flex-direction: column;
+      }
+
+      .setting-group {
+        min-width: 100%;
+      }
+
+      textarea {
+        min-height: 200px;
+      }
+
+      .mic-button {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .textarea-footer {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .actions {
+        width: 100%;
+      }
+
+      .btn {
+        flex: 1;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body class="dark">
+  <div class="container">
+    <!-- هدر -->
+    <header class="header">
+      <div class="logo-section">
+        <div class="logo"></div>
+        <div class="title-group">
+          <h1>تبدیل گفتار به متن</h1>
+          <p>ضبط زنده، زبان فارسی، خروجی قابل ویرایش</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span>Web Speech API</span>
+        </div>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="تغییر تم">
+          <div class="theme-toggle-slider">🌙</div>
+        </button>
+      </div>
+    </header>
+
+    <!-- محتوای اصلی -->
+    <main class="main-content">
+      <!-- کارت اصلی - متن خروجی -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">متن خروجی</h2>
+            <p class="card-subtitle">
+              هرآنچه می‌گویید به‌صورت زنده به متن تبدیل می‌شود؛ قبل از ذخیره می‌توانید ویرایش کنید.
+            </p>
+          </div>
+          <span class="badge">فوق دقیق · Real-time</span>
+        </div>
+
+        <!-- تنظیمات -->
+        <div class="settings">
+          <div class="setting-group">
+            <label class="setting-label" for="languageSelect">زبان ورودی</label>
+            <select id="languageSelect">
+              <option value="fa-IR" selected>🇮🇷 فارسی (ایران)</option>
+              <option value="en-US">🇺🇸 انگلیسی (US)</option>
+              <option value="en-GB">🇬🇧 انگلیسی (UK)</option>
+              <option value="ar-SA">🇸🇦 عربی</option>
+              <option value="de-DE">🇩🇪 آلمانی</option>
+              <option value="fr-FR">🇫🇷 فرانسوی</option>
+              <option value="tr-TR">🇹🇷 ترکی استانبولی</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">گزینه‌های پیشرفته</label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" id="autoPunctuation" checked />
+                <span>افزودن خودکار نقطه‌گذاری ساده</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" id="smartMerge" checked />
+                <span>ادغام هوشمند جملات کوتاه</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ناحیه متن -->
+        <div class="textarea-wrapper">
+          <textarea 
+            id="transcript" 
+            placeholder="روی دکمه میکروفون بزنید و شروع به صحبت کنید..."
+            dir="rtl"
+          ></textarea>
+        </div>
+
+        <!-- فوتر متن -->
+        <div class="textarea-footer">
+          <div class="stats">
+            <div class="stat-item">
+              <span>⏱</span>
+              <span id="durationStat">زمان: ۰۰:۰۰</span>
+            </div>
+            <div class="stat-item">
+              <span>✍️</span>
+              <span id="wordsStat">واژه‌ها: 0</span>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" id="copyBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              کپی متن
+            </button>
+            <button class="btn" id="downloadBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              دانلود .txt
+            </button>
+            <button class="btn btn-danger" id="clearBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+              پاک کردن
+            </button>
+          </div>
+        </div>
+
+        <!-- هشدار پشتیبانی -->
+        <div class="alert" id="supportAlert">
+          مرورگر شما از Web Speech API پشتیبانی نمی‌کند یا دسترسی میکروفون محدود است.
+          برای بهترین نتیجه از آخرین نسخه Chrome یا Edge استفاده کنید.
+        </div>
+      </div>
+
+      <!-- کارت کنترل -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">کنترل ضبط</h2>
+            <p class="card-subtitle">شروع، توقف و پایش زنده وضعیت تبدیل گفتار به متن.</p>
+          </div>
+          <span class="badge" id="engineLabel">Engine: SpeechRecognition</span>
+        </div>
+
+        <!-- کنترل میکروفن -->
+        <div class="mic-control">
+          <button class="mic-button" id="micBtn" type="button" aria-label="شروع/توقف ضبط">
+            <div class="mic-icon">
+              <div class="mic-capsule"></div>
+              <div class="mic-stand"></div>
+              <div class="mic-base"></div>
+            </div>
+          </button>
+          
+          <div class="status-display">
+            <div class="status-text" id="statusText">
+              <strong>آماده</strong> — روی میکروفون کلیک کنید
+            </div>
+            <div class="hint-text">
+              میانبر: <code>Ctrl + Space</code> برای شروع/توقف
+            </div>
+          </div>
+        </div>
+
+        <!-- حالت‌های استفاده -->
+        <div class="info-section">
+          <h3 class="info-title">حالت‌های پیشنهادی استفاده</h3>
+          <div class="tag-list">
+            <span class="tag">یادداشت‌برداری جلسات</span>
+            <span class="tag">تبدیل کلاس‌های آنلاین</span>
+            <span class="tag">نوشتن متن بدون تایپ</span>
+            <span class="tag">ضبط ایده‌های سریع</span>
+          </div>
+        </div>
+
+        <!-- نکات -->
+        <div class="info-section">
+          <h3 class="info-title">نکات برای دقت بهتر</h3>
+          <ul class="tips-list">
+            <li>در یک محیط نسبتا آرام صحبت کنید.</li>
+            <li>جملات را کمی شمرده و واضح ادا کنید.</li>
+            <li>در صورت نیاز، از گزینه «افزودن خودکار نقطه‌گذاری» استفاده کنید.</li>
+            <li>در پایان کار متن را یک بار مرور و ویرایش نهایی انجام دهید.</li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast اعلان -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">✓</div>
+    <span id="toastText">کپی شد!</span>
+  </div>
+
+  <script>
+    // تنظیمات اولیه و متغیرهای عمومی
+    (function() {
+      // المنت‌های DOM
+      const elements = {
+        transcript: document.getElementById('transcript'),
+        micBtn: document.getElementById('micBtn'),
+        statusText: document.getElementById('statusText'),
+        languageSelect: document.getElementById('languageSelect'),
+        autoPunctuation: document.getElementById('autoPunctuation'),
+        smartMerge: document.getElementById('smartMerge'),
+        supportAlert: document.getElementById('supportAlert'),
+        engineLabel: document.getElementById('engineLabel'),
+        copyBtn: document.getElementById('copyBtn'),
+        clearBtn: document.getElementById('clearBtn'),
+        downloadBtn: document.getElementById('downloadBtn'),
+        durationStat: document.getElementById('durationStat'),
+        wordsStat: document.getElementById('wordsStat'),
+        themeToggle: document.getElementById('themeToggle'),
+        toast: document.getElementById('toast'),
+        toastText: document.getElementById('toastText')
+      };
+
+      // متغیرهای وضعیت
+      let recognitionInstance = null;
+      let isCurrentlyListening = false;
+      let fullTranscriptText = '';
+      let recordingStartTime = null;
+      let timerIntervalId = null;
+      let apiSupported = false;
+
+      // نمایش پیام Toast
+      function displayToast(message) {
+        elements.toastText.textContent = message;
+        elements.toast.classList.add('show');
+        setTimeout(() => {
+          elements.toast.classList.remove('show');
+        }, 2500);
+      }
+
+      // به‌روزرسانی آمار
+      function refreshStats() {
+        const currentText = elements.transcript.value.trim();
+        const wordCount = currentText ? currentText.split(/\s+/).filter(w => w.length > 0).length : 0;
+        elements.wordsStat.textContent = 'واژه‌ها: ' + wordCount;
+
+        // محاسبه زمان
+        if (!recordingStartTime || !isCurrentlyListening) {
+          elements.durationStat.textContent = 'زمان: ۰۰:۰۰';
+          return;
+        }
+
+        const elapsedSeconds = Math.floor((Date.now() - recordingStartTime) / 1000);
+        const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+        const secs = String(elapsedSeconds % 60).padStart(2, '0');
+        elements.durationStat.textContent = `زمان: ${mins}:${secs}`;
+      }
+
+      // تنظیم وضعیت
+      function updateStatus(message, isActive = false) {
+        elements.statusText.innerHTML = message;
+        
+        if (isActive) {
+          elements.micBtn.classList.add('active');
+        } else {
+          elements.micBtn.classList.remove('active');
+        }
+      }
+
+      // نرمال‌سازی متن
+      function normalizeTranscript(text) {
+        let processedText = text;
+        
+        // اضافه کردن نقطه‌گذاری خودکار
+        if (elements.autoPunctuation.checked) {
+          processedText = processedText.replace(/\s+([،\.؟?!])/g, '$1');
+          // اگر جمله نقطه ندارد، اضافه کن
+          if (!/[\.؟!]$/.test(processedText.trim()) && processedText.trim().length > 0) {
+            processedText = processedText.trim() + '.';
+          }
+        }
+
+        // ادغام هوشمند فاصله‌ها
+        if (elements.smartMerge.checked) {
+          processedText = processedText.replace(/\s{3,}/g, '  ');
+        }
+
+        return processedText;
+      }
+
+      // تنظیم جهت متن بر اساس زبان
+      function adjustTextDirection(langCode) {
+        // زبان‌های راست به چپ
+        const rtlLanguages = /^(fa|ar|he|ur)-/;
+        
+        if (rtlLanguages.test(langCode)) {
+          elements.transcript.setAttribute('dir', 'rtl');
+        } else {
+          elements.transcript.setAttribute('dir', 'ltr');
+        }
+      }
+
+      // راه‌اندازی موتور تشخیص گفتار
+      function setupRecognition() {
+        // بررسی پشتیبانی مرورگر
+        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognitionAPI) {
+          apiSupported = false;
+          elements.supportAlert.classList.add('show');
+          updateStatus('<strong>پشتیبانی نشد</strong> — این مرورگر قابلیت تشخیص گفتار ندارد');
+          elements.engineLabel.textContent = 'Engine: Not available';
+          return;
+        }
+
+        apiSupported = true;
+
+        // ایجاد نمونه جدید
+        recognitionInstance = new SpeechRecognitionAPI();
+        recognitionInstance.continuous = true;
+        recognitionInstance.interimResults = true;
+        recognitionInstance.lang = elements.languageSelect.value;
+
+        // نمایش نام موتور
+        const engineName = window.SpeechRecognition ? 'SpeechRecognition' : 'webkitSpeechRecognition';
+        elements.engineLabel.textContent = 'Engine: ' + engineName;
+
+        // رویداد شروع ضبط
+        recognitionInstance.onstart = function() {
+          isCurrentlyListening = true;
+          recordingStartTime = Date.now();
+          
+          if (timerIntervalId) {
+            clearInterval(timerIntervalId);
+          }
+          timerIntervalId = setInterval(refreshStats, 500);
+          
+          updateStatus('<strong>در حال گوش دادن...</strong> — برای توقف دوباره کلیک کنید', true);
+        };
+
+        // رویداد خطا
+        recognitionInstance.onerror = function(errorEvent) {
+          console.error('خطای تشخیص گفتار:', errorEvent);
+          
+          let errorMessage = 'خطای ناشناخته';
+          if (errorEvent.error) {
+            errorMessage = errorEvent.error;
+          }
+          
+          updateStatus('<strong>خطا در تشخیص</strong> — ' + errorMessage);
+          elements.supportAlert.classList.add('show');
+        };
+
+        // رویداد پایان ضبط
+        recognitionInstance.onend = function() {
+          isCurrentlyListening = false;
+          
+          if (timerIntervalId) {
+            clearInterval(timerIntervalId);
+          }
+          
+          refreshStats();
+          updateStatus('<strong>متوقف شد</strong> — برای شروع دوباره روی میکروفون کلیک کنید');
+        };
+
+        // رویداد دریافت نتیجه
+        recognitionInstance.onresult = function(resultEvent) {
+          let interimText = '';
+          
+          for (let i = resultEvent.resultIndex; i < resultEvent.results.length; i++) {
+            const result = resultEvent.results[i];
+            const transcriptPart = result[0].transcript;
+            
+            if (result.isFinal) {
+              // متن نهایی
+              fullTranscriptText += ' ' + transcriptPart;
+              fullTranscriptText = normalizeTranscript(fullTranscriptText);
+            } else {
+              // متن موقت
+              interimText += transcriptPart;
+            }
+          }
+          
+          // ترکیب متن نهایی و موقت
+          const combinedText = (fullTranscriptText + ' ' + interimText).trim();
+          elements.transcript.value = combinedText;
+          refreshStats();
+        };
+      }
+
+      // تغییر وضعیت ضبط
+      function toggleRecording() {
+        if (!apiSupported || !recognitionInstance) {
+          displayToast('مرورگر از تشخیص گفتار پشتیبانی نمی‌کند.');
+          return;
+        }
+
+        if (!isCurrentlyListening) {
+          // شروع ضبط
+          try {
+            recognitionInstance.lang = elements.languageSelect.value;
+            adjustTextDirection(elements.languageSelect.value);
+            recognitionInstance.start();
+          } catch (error) {
+            console.error('خطا در شروع ضبط:', error);
+            displayToast('امکان شروع ضبط وجود ندارد.');
+          }
+        } else {
+          // توقف ضبط
+          try {
+            recognitionInstance.stop();
+          } catch (error) {
+            console.error('خطا در توقف ضبط:', error);
+          }
+        }
+      }
+
+      // تغییر تم
+      elements.themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark');
+        const slider = elements.themeToggle.querySelector('.theme-toggle-slider');
+        slider.textContent = document.body.classList.contains('dark') ? '🌙' : '☀️';
+      });
+
+      // دکمه میکروفن
+      elements.micBtn.addEventListener('click', toggleRecording);
+
+      // میانبر صفحه‌کلید
+      window.addEventListener('keydown', function(event) {
+        if (event.code === 'Space' && (event.ctrlKey || event.metaKey)) {
+          event.preventDefault();
+          toggleRecording();
+        }
+      });
+
+      // به‌روزرسانی آمار با ویرایش دستی
+      elements.transcript.addEventListener('input', function() {
+        fullTranscriptText = elements.transcript.value;
+        refreshStats();
+      });
+
+      // تغییر زبان
+      elements.languageSelect.addEventListener('change', function() {
+        adjustTextDirection(elements.languageSelect.value);
+        
+        // اگر در حال ضبط بود، مجددا شروع کن
+        if (isCurrentlyListening && recognitionInstance) {
+          recognitionInstance.stop();
+          setTimeout(function() {
+            toggleRecording();
+          }, 300);
+        }
+      });
+
+      // دکمه کپی
+      elements.copyBtn.addEventListener('click', async function() {
+        const textToCopy = elements.transcript.value;
+        
+        if (!textToCopy.trim()) {
+          displayToast('متنی برای کپی وجود ندارد.');
+          return;
+        }
+
+        try {
+          // روش اول: استفاده از Clipboard API
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(textToCopy);
+          } else {
+            // روش دوم: استفاده از textarea موقت
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = textToCopy;
+            tempTextarea.style.position = 'fixed';
+            tempTextarea.style.opacity = '0';
+            document.body.appendChild(tempTextarea);
+            tempTextarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextarea);
+          }
+          
+          displayToast('متن در حافظه کلیپ‌بورد کپی شد.');
+        } catch (error) {
+          console.error('خطا در کپی:', error);
+          displayToast('خطا در کپی متن.');
+        }
+      });
+
+      // دکمه پاک کردن
+      elements.clearBtn.addEventListener('click', function() {
+        fullTranscriptText = '';
+        elements.transcript.value = '';
+        recordingStartTime = null;
+        refreshStats();
+        displayToast('متن پاک شد.');
+      });
+
+      // دکمه دانلود
+      elements.downloadBtn.addEventListener('click', function() {
+        const textToDownload = elements.transcript.value;
+        
+        if (!textToDownload.trim()) {
+          displayToast('متنی برای دانلود وجود ندارد.');
+          return;
+        }
+
+        // ایجاد فایل
+        const fileBlob = new Blob([textToDownload], { type: 'text/plain;charset=utf-8' });
+        const downloadUrl = URL.createObjectURL(fileBlob);
+        
+        // ایجاد لینک دانلود
+        const downloadLink = document.createElement('a');
+        downloadLink.href = downloadUrl;
+        
+        // نام فایل با تاریخ و زمان
+        const currentLang = elements.languageSelect.value || 'fa-IR';
+        const currentDate = new Date();
+        const dateStamp = currentDate.toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        downloadLink.download = `speech-to-text-${currentLang}-${dateStamp}.txt`;
+        
+        // اجرای دانلود
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(downloadUrl);
+        
+        displayToast('فایل متنی دانلود شد.');
+      });
+
+      // راه‌اندازی اولیه
+      setupRecognition();
+      adjustTextDirection(elements.languageSelect.value);
+      refreshStats();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,3275 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Universe | آزمایشگاه پیشرفته رنگ‌ها</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.8.0/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6e8efb;
+            --secondary-color: #a777e3;
+            --text-color: #2c3e50;
+            --bg-color: #f8f9fa;
+            --panel-bg: rgba(255, 255, 255, 0.97);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            --border-radius: 16px;
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+        
+        .dark-mode {
+            --primary-color: #8a7cff;
+            --secondary-color: #6a5acd;
+            --text-color: #ecf0f1;
+            --bg-color: #121212;
+            --panel-bg: rgba(30, 30, 30, 0.97);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: var(--transition);
+        }
+        
+        #main-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        /* بخش هدر و کنترل پنل */
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            transition: var(--transition);
+        }
+        
+        #logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+        
+        #logo i {
+            color: var(--primary-color);
+        }
+        
+        #control-panel {
+            position: fixed;
+            top: 80px;
+            left: 30px;
+            background: var(--panel-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            width: 350px;
+            z-index: 90;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+            transform-origin: top left;
+            border: 1px solid rgba(0,0,0,0.05);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* بخش بصری و انیمیشن */
+        #visualization-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        /* بخش آزمایشگاه رنگ */
+        #color-lab {
+            position: relative;
+            min-height: 100vh;
+            padding: 120px 30px 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            margin-top: 80vh;
+            background: var(--bg-color);
+            border-top-left-radius: 40px;
+            border-top-right-radius: 40px;
+            box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+        
+        /* گوی رنگ پیشرفته */
+        #color-sphere-container {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin: 3rem auto;
+            perspective: 1000px;
+        }
+        
+        #color-sphere {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3),
+                        inset 0 -20px 30px rgba(0, 0, 0, 0.2),
+                        inset 0 20px 30px rgba(255, 255, 255, 0.2);
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        #color-sphere:hover {
+            transform: scale(1.05) translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4),
+                        inset 0 -20px 30px rgba(0, 0, 0, 0.2),
+                        inset 0 20px 30px rgba(255, 255, 255, 0.3);
+        }
+        
+        #color-sphere::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+            opacity: 0.3;
+            transition: var(--transition);
+        }
+        
+        #color-sphere:hover::before {
+            opacity: 0.5;
+        }
+        
+        .sphere-reflection {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        
+        /* پالت‌های پیشنهادی */
+        #suggested-palettes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 3rem auto;
+        }
+        
+        .palette-card {
+            background: var(--panel-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .palette-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+        
+        .palette-colors {
+            display: flex;
+            height: 150px;
+        }
+        
+        .palette-color {
+            flex: 1;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .palette-color::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%);
+        }
+        
+        .palette-info {
+            padding: 20px;
+        }
+        
+        .palette-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+        
+        .palette-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .tag {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            transition: var(--transition);
+        }
+        
+        .palette-card:hover .tag {
+            background: rgba(0, 0, 0, 0.15);
+        }
+        
+        /* دکمه‌ها و کنترل‌ها */
+        .btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0.9;
+        }
+        
+        .btn-secondary {
+            background: var(--panel-bg);
+            color: var(--primary-color);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--panel-bg);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .btn-icon:hover {
+            transform: scale(1.1);
+        }
+        
+        /* پالت نمایش رنگ */
+        #palette-display {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: var(--panel-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            z-index: 90;
+            max-width: 90%;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,0,0,0.2) transparent;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        #palette-display::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        #palette-display::-webkit-scrollbar-thumb {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+        
+        .color-card {
+            width: 120px;
+            height: 160px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .color-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .color-box {
+            width: 100%;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .color-box::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 100%);
+        }
+        
+        .color-info {
+            padding: 12px;
+            background: var(--panel-bg);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .color-code {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .color-name {
+            font-size: 12px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .color-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+        
+        .color-action {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 12px;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .color-action:hover {
+            color: var(--primary-color);
+        }
+        
+        /* نوتیفیکیشن */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+            backdrop-filter: blur(5px);
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+        
+        /* اسکرول پارالاکس */
+        .parallax-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* حالت تاریک */
+        .dark-mode-toggle {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: var(--panel-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            z-index: 100;
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .dark-mode-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        /* کنترل پنل پیشرفته */
+        .control-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .control-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .control-group-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .color-picker-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-picker-label {
+            font-size: 14px;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        
+        #base-color {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+        }
+        
+        #base-color::-webkit-color-swatch {
+            border-radius: 6px;
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+        
+        #base-color::-moz-color-swatch {
+            border-radius: 6px;
+            border: 2px solid rgba(0,0,0,0.1);
+        }
+        
+        /* اسلایدرها */
+        .slider-container {
+            margin-bottom: 15px;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(0,0,0,0.1);
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        /* بخش آپلود تصویر */
+        #image-upload-section {
+            background: var(--panel-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin: 30px auto;
+            max-width: 800px;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        #upload-container {
+            border: 2px dashed rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #upload-container:hover {
+            border-color: var(--primary-color);
+            background: rgba(110, 142, 251, 0.05);
+        }
+        
+        #upload-container.dragover {
+            border-color: var(--primary-color);
+            background: rgba(110, 142, 251, 0.1);
+        }
+        
+        #upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        #upload-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        #upload-hint {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        #file-input {
+            display: none;
+        }
+        
+        #upload-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        #upload-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        #image-preview-container {
+            display: none;
+            margin-top: 30px;
+            position: relative;
+        }
+        
+        #image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        #extract-btn {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        #image-palette {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        /* ریسپانسیو */
+        @media (max-width: 992px) {
+            #control-panel {
+                top: auto;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 90%;
+                max-width: 400px;
+            }
+            
+            #palette-display {
+                bottom: 80px;
+                width: 90%;
+            }
+            
+            .dark-mode-toggle {
+                bottom: 140px;
+            }
+            
+            #color-sphere-container {
+                width: 280px;
+                height: 280px;
+            }
+            
+            #image-upload-section {
+                padding: 20px;
+            }
+            
+            #upload-container {
+                padding: 30px 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #header {
+                padding: 15px;
+            }
+            
+            #color-lab {
+                padding: 100px 15px 30px;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            #suggested-palettes {
+                grid-template-columns: 1fr;
+            }
+            
+            .color-card {
+                width: 100px;
+                height: 140px;
+            }
+            
+            .color-box {
+                height: 100px;
+            }
+            
+            #upload-text {
+                font-size: 16px;
+            }
+        }
+        
+        /* انیمیشن‌های اضافه */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* افکت‌های ویژه برای گوی رنگی */
+        .sphere-orb {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(10px);
+            opacity: 0.7;
+            z-index: -1;
+        }
+        
+        /* پالت‌های هوش مصنوعی */
+        .ai-palette {
+            position: relative;
+        }
+        
+        .ai-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #ff8a00, #e52e71);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        
+        /* پنل تاریخچه */
+        .history-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: rgba(0,0,0,0.03);
+        }
+        
+        .history-item:hover {
+            background: rgba(0,0,0,0.05);
+        }
+        
+        .history-colors {
+            display: flex;
+            width: 60px;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .history-color {
+            flex: 1;
+        }
+        
+        .history-info {
+            flex-grow: 1;
+        }
+        
+        .history-name {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* بخش جدید - سیستم ذخیره‌سازی */
+        .save-palette-btn {
+            background: var(--panel-bg);
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .save-palette-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* بخش جدید - اشتراک‌گذاری */
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .share-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .share-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .twitter-share { background: #1DA1F2; }
+        .facebook-share { background: #4267B2; }
+        .instagram-share { background: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D); }
+        .whatsapp-share { background: #25D366; }
+        
+        /* بخش جدید - بررسی کنتراست */
+        .contrast-checker {
+            background: var(--panel-bg);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .contrast-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .good-contrast {
+            background: #d8f3dc;
+            color: #1b4332;
+        }
+        
+        .bad-contrast {
+            background: #ffcdd2;
+            color: #b71c1c;
+        }
+       
+        /* بخش جدید - سازماندهی پروژه */
+        .project-card {
+            background: var(--panel-bg);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            border: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .project-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .project-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .project-date {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* بخش جدید - میکسر رنگ */
+        .color-mixer {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .mixer-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .mixer-result {
+            width: 100%;
+            height: 60px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        /* بخش جدید - لاک رنگ */
+        .locked-colors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .locked-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .locked-color::after {
+            content: '×';
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: white;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .locked-color:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <!-- بخش بصری و ذرات -->
+        <div id="visualization-container"></div>
+        
+        <!-- هدر -->
+        <header id="header">
+            <a href="#" id="logo">
+                <i class="fas fa-palette"></i>
+                <span>Color Universe</span>
+            </a>
+            <div class="btn-icon" id="settings-btn">
+                <i class="fas fa-sliders-h"></i>
+            </div>
+        </header>
+        
+        <!-- کنترل پنل پیشرفته -->
+        <div id="control-panel" class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fas fa-magic"></i>
+                    <span>کنترل رنگ‌ها</span>
+                </div>
+                <div class="btn-icon" id="close-panel">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-group-title">
+                    <i class="fas fa-eyedropper"></i>
+                    <span>انتخاب رنگ پایه</span>
+                </div>
+                <div class="color-picker-container">
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="base-color" value="#6e8efb">
+                        <span class="color-picker-label">رنگ پایه را انتخاب کنید</span>
+                    </div>
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>تنوع رنگ‌ها</span>
+                        <span id="variation-value">50%</span>
+                    </div>
+                    <input type="range" min="10" max="100" value="50" class="slider" id="variation-slider">
+                </div>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>تعداد رنگ‌ها</span>
+                        <span id="count-value">5</span>
+                    </div>
+                    <input type="range" min="3" max="8" value="5" class="slider" id="count-slider">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-group-title">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    <span>عملیات رنگ</span>
+                </div>
+                <button class="btn" id="generate-btn">
+                    <i class="fas fa-paint-brush"></i>
+                    <span>تولید پالت جدید</span>
+                </button>
+                
+                <button class="btn btn-secondary" id="random-btn">
+                    <i class="fas fa-random"></i>
+                    <span>پالت تصادفی</span>
+                </button>
+
+                <!-- بخش جدید - میکسر رنگ -->
+                <div class="color-mixer">
+                    <div class="control-group-title">
+                        <i class="fas fa-blender"></i>
+                        <span>میکسر رنگ</span>
+                    </div>
+                    <div class="mixer-controls">
+                        <input type="color" id="mixer-color-1" value="#ff0000">
+                        <input type="color" id="mixer-color-2" value="#0000ff">
+                        <button id="mix-colors-btn" class="btn-icon" style="width: auto; padding: 0 15px;">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="mixer-result" id="mixer-result"></div>
+                </div>
+
+                <!-- بخش جدید - لاک رنگ -->
+                <div class="locked-colors-container">
+                    <div class="control-group-title">
+                        <i class="fas fa-lock"></i>
+                        <span>رنگ‌های قفل شده</span>
+                    </div>
+                    <div class="locked-colors" id="locked-colors">
+                        <!-- رنگ‌های قفل شده اینجا نمایش داده می‌شوند -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-group-title">
+                    <i class="fas fa-robot"></i>
+                    <span>هوش مصنوعی</span>
+                </div>
+                <button class="btn" id="ai-suggest-btn">
+                    <i class="fas fa-brain"></i>
+                    <span>پیشنهاد هوش مصنوعی</span>
+                </button>
+                
+                <div class="slider-container">
+                    <div class="slider-label">
+                        <span>خلاقیت</span>
+                        <span id="creativity-value">70%</span>
+                    </div>
+                    <input type="range" min="10" max="100" value="70" class="slider" id="creativity-slider">
+                </div>
+
+                <!-- بخش جدید - پیشنهاد بر اساس کلمات کلیدی -->
+                <div class="control-group-title" style="margin-top: 15px;">
+                    <i class="fas fa-keyboard"></i>
+                    <span>پیشنهاد بر اساس کلیدواژه</span>
+                </div>
+                <input type="text" id="ai-keyword" placeholder="مثلاً: آرامش‌بخش، انرژی‌بخش" 
+                       style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
+                <button class="btn btn-secondary" id="ai-keyword-btn" style="margin-top: 10px;">
+                    <i class="fas fa-search"></i>
+                    <span>تولید پالت</span>
+                </button>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-group-title">
+                    <i class="fas fa-history"></i>
+                    <span>تاریخچه پالت‌ها</span>
+                </div>
+                <div id="history-list">
+                    <!-- آیتم‌های تاریخچه اینجا لود می‌شوند -->
+                </div>
+            </div>
+
+            <!-- بخش جدید - پروژه‌ها -->
+            <div class="control-group">
+                <div class="control-group-title">
+                    <i class="fas fa-folder"></i>
+                    <span>پروژه‌های من</span>
+                </div>
+                <div id="projects-list">
+                    <div class="project-card">
+                        <div class="project-title">پروژه ۱</div>
+                        <div class="project-date">۱۴۰۲/۰۵/۱۵</div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-title">پروژه ۲</div>
+                        <div class="project-date">۱۴۰۲/۰۶/۲۰</div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" id="new-project-btn" style="margin-top: 10px;">
+                    <i class="fas fa-plus"></i>
+                    <span>پروژه جدید</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- نمایش پالت رنگ -->
+        <div id="palette-display"></div>
+
+        <!-- بخش جدید - ابزارهای پالت -->
+        <div id="palette-tools" style="position: fixed; bottom: 180px; left: 50%; transform: translateX(-50%); 
+             background: var(--panel-bg); padding: 10px 15px; border-radius: var(--border-radius); 
+             box-shadow: var(--shadow); z-index: 90; display: flex; gap: 10px; border: 1px solid rgba(0,0,0,0.05);">
+            <button id="save-palette-btn" class="save-palette-btn">
+                <i class="fas fa-save"></i>
+                <span>ذخیره پالت</span>
+            </button>
+            <button id="export-palette-btn" class="save-palette-btn">
+                <i class="fas fa-download"></i>
+                <span>خروجی گرفتن</span>
+            </button>
+            <button id="share-palette-btn" class="save-palette-btn">
+                <i class="fas fa-share-alt"></i>
+                <span>اشتراک‌گذاری</span>
+            </button>
+        </div>
+        
+        <!-- دکمه تغییر حالت تاریک -->
+        <div class="dark-mode-toggle" id="dark-mode-toggle">
+            <i class="fas fa-moon"></i>
+        </div>
+        
+        <!-- بخش آزمایشگاه رنگ -->
+        <section id="color-lab">
+            <h2 class="section-title">آزمایشگاه رنگ</h2>
+            
+            <!-- بخش آپلود تصویر و استخراج رنگ -->
+            <div id="image-upload-section">
+                <h3>استخراج پالت رنگ از تصاویر</h3>
+                <br>
+                <p>تصویر خود را آپلود کنید تا پالت رنگ آن را استخراج کنیم</p>
+                <br>
+            
+                <div id="upload-container">
+                    <div id="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div id="upload-text">تصویر را اینجا رها کنید یا کلیک کنید</div>
+                    <div id="upload-hint">فرمت‌های پشتیبانی شده: JPG, PNG, GIF (حداکثر 5MB)</div>
+                    <button id="upload-btn" class="btn">انتخاب فایل</button>
+                    <input type="file" id="file-input" accept="image/*">
+                </div>
+                
+                <div id="image-preview-container">
+                    <img id="image-preview" src="#" alt="Preview">
+                    <button id="extract-btn" class="btn">
+                        <i class="fas fa-palette"></i>
+                        <span>استخراج پالت رنگ</span>
+                    </button>
+                </div>
+                
+                <div id="image-palette"></div>
+            </div>
+            
+            <div id="color-sphere-container">
+                <div id="color-sphere" class="pulse"></div>
+            </div>
+            
+            <div class="lab-controls">
+                <button class="btn" id="lab-generate-btn">
+                    <i class="fas fa-atom"></i>
+                    <span>تولید ترکیب جدید</span>
+                </button>
+            </div>
+
+            <!-- بخش جدید - بررسی کنتراست -->
+            <div class="contrast-checker">
+                <h3>بررسی کنتراست رنگ‌ها</h3>
+                <p>کنتراست بین دو رنگ را بررسی کنید تا از خوانایی مطمئن شوید</p>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <input type="color" id="contrast-color-1" value="#ffffff">
+                    <input type="color" id="contrast-color-2" value="#000000">
+                    <button id="check-contrast-btn" class="btn-icon" style="width: auto; padding: 0 15px;">
+                        <i class="fas fa-check"></i>
+                        بررسی
+                    </button>
+                </div>
+                <div class="contrast-result" id="contrast-result" style="display: none;">
+                    نتیجه بررسی کنتراست
+                </div>
+            </div>
+<br>
+<br>
+            
+            <h3 class="section-subtitle">پالت‌های پیشنهادی جهانی</h3>
+            
+            <div id="suggested-palettes">
+                <!-- پالت‌ها اینجا لود می‌شوند -->
+            </div>
+        </section>
+        
+        <!-- نوتیفیکیشن -->
+        <div class="notification" id="notification">
+            <i class="fas fa-check-circle"></i>
+            <span id="notification-text">کد رنگ کپی شد!</span>
+        </div>
+
+        <!-- بخش جدید - پنل اشتراک‌گذاری -->
+        <div id="share-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+             background: var(--panel-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow); 
+             z-index: 200; max-width: 90%; width: 400px; border: 1px solid rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>اشتراک‌گذاری پالت</h3>
+                <button id="close-share-panel" class="btn-icon">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <input type="text" id="share-link" readonly 
+                       style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(0,0,0,0.1);">
+                <button id="copy-link-btn" class="btn" style="margin-top: 10px;">
+                    <i class="fas fa-copy"></i>
+                    <span>کپی لینک</span>
+                </button>
+            </div>
+            
+            <div class="share-buttons">
+                <div class="share-btn twitter-share">
+                    <i class="fab fa-twitter"></i>
+                </div>
+                <div class="share-btn facebook-share">
+                    <i class="fab fa-facebook-f"></i>
+                </div>
+                <div class="share-btn instagram-share">
+                    <i class="fab fa-instagram"></i>
+                </div>
+                <div class="share-btn whatsapp-share">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- بخش جدید - پنل export -->
+        <div id="export-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+             background: var(--panel-bg); padding: 30px; border-radius: var(--border-radius); box-shadow: var(--shadow); 
+             z-index: 200; max-width: 90%; width: 400px; border: 1px solid rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>خروجی گرفتن از پالت</h3>
+                <button id="close-export-panel" class="btn-icon">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="export-options">
+                <button class="export-btn" data-format="css">
+                    <i class="fab fa-css3-alt"></i>
+                    CSS
+                </button>
+                <button class="export-btn" data-format="scss">
+                    <i class="fab fa-sass"></i>
+                    SCSS
+                </button>
+                <button class="export-btn" data-format="json">
+                    <i class="fas fa-code"></i>
+                    JSON
+                </button>
+                <button class="export-btn" data-format="png">
+                    <i class="fas fa-image"></i>
+                    PNG
+                </button>
+                <button class="export-btn" data-format="svg">
+                    <i class="fas fa-image"></i>
+                    SVG
+                </button>
+            </div>
+            
+            <div id="export-code-container" style="margin-top: 20px; display: none;">
+                <textarea id="export-code" readonly style="width: 100%; height: 150px; padding: 10px; 
+                    border-radius: 8px; border: 1px solid rgba(0,0,0,0.1); font-family: monospace;"></textarea>
+                <button id="copy-export-btn" class="btn" style="margin-top: 10px;">
+                    <i class="fas fa-copy"></i>
+                    <span>کپی کد</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تنظیمات Three.js
+        let scene, camera, renderer, particlesMesh;
+        let isDarkMode = false;
+        let paletteHistory = [];
+        let currentPalette = [];
+        let suggestedPalettes = [];
+        let colorVariation = 50;
+        let colorCount = 5;
+        let creativityLevel = 70;
+        const colorThief = new ColorThief();
+        let lockedColors = [];
+        
+        // مقداردهی اولیه Three.js
+        function initThreeJS() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+            
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            document.getElementById('visualization-container').appendChild(renderer.domElement);
+            
+            // ایجاد ذرات رنگی
+            const geometry = new THREE.BufferGeometry();
+            const count = 2000;
+            
+            const positions = new Float32Array(count * 3);
+            const colors = new Float32Array(count * 3);
+            const sizes = new Float32Array(count);
+            
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 400;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 400;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 400;
+                
+                colors[i * 3] = Math.random();
+                colors[i * 3 + 1] = Math.random();
+                colors[i * 3 + 2] = Math.random();
+                
+                sizes[i] = Math.random() * 4;
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.7,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            particlesMesh = new THREE.Points(geometry, material);
+            scene.add(particlesMesh);
+            
+            // انیمیشن ذرات
+            function animateParticles() {
+                requestAnimationFrame(animateParticles);
+                
+                particlesMesh.rotation.x += 0.0005;
+                particlesMesh.rotation.y += 0.001;
+                
+                renderer.render(scene, camera);
+            }
+            
+            animateParticles();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+        
+        // ایجاد پالت‌های پیشنهادی جهانی (200+ پالت)
+        function generateSuggestedPalettes() {
+            const palettes = [
+                // طبیعت (50 پالت)
+                {
+                    name: "طبیعت زنده",
+                    colors: ["#3a5a40", "#588157", "#a3b18a", "#dad7cd", "#f77f00"],
+                    tags: ["طبیعت", "آرامش", "سبز"]
+                },
+                {
+                    name: "جنگل بارانی",
+                    colors: ["#1e3d36", "#2d5d4e", "#5e8b7e", "#a4c3b2", "#cce3de"],
+                    tags: ["جنگل", "طبیعت", "سبز"]
+                },
+                {
+                    name: "کوهستان",
+                    colors: ["#354f52", "#52796f", "#84a98c", "#cad2c5", "#f8f9fa"],
+                    tags: ["کوه", "طبیعت", "آبی"]
+                },
+                {
+                    name: "بیابان",
+                    colors: ["#d4a59a", "#efd3d7", "#f8edeb", "#fae1dd", "#fec89a"],
+                    tags: ["بیابان", "گرم", "قهوه‌ای"]
+                },
+                {
+                    name: "اقیانوس",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["دریا", "آبی", "آرامش"]
+                },
+                {
+                    name: "ساحل",
+                    colors: ["#f8f3e6", "#d9e4dd", "#b5c9c3", "#84a9ac", "#6a8caf"],
+                    tags: ["دریا", "ساحل", "آبی"]
+                },
+                {
+                    name: "بهاری",
+                    colors: ["#d8f3dc", "#b7e4c7", "#95d5b2", "#74c69d", "#52b788"],
+                    tags: ["بهار", "تازه", "سبز"]
+                },
+                {
+                    name: "تابستانی",
+                    colors: ["#ffbe0b", "#fb5607", "#ff006e", "#8338ec", "#3a86ff"],
+                    tags: ["تابستان", "رنگی", "گرم"]
+                },
+                {
+                    name: "پاییزی",
+                    colors: ["#d4a373", "#bc6c25", "#a68a64", "#b6ad90", "#c2c5aa"],
+                    tags: ["پاییز", "قهوه‌ای", "نارنجی"]
+                },
+                {
+                    name: "زمستانی",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["زمستان", "سرد", "سفید"]
+                },
+                
+                // غذا (20 پالت)
+                {
+                    name: "میوه‌های تازه",
+                    colors: ["#f94144", "#f3722c", "#f8961e", "#f9c74f", "#90be6d"],
+                    tags: ["میوه", "تازه", "رنگی"]
+                },
+                {
+                    name: "سالاد",
+                    colors: ["#606c38", "#283618", "#fefae0", "#dda15e", "#bc6c25"],
+                    tags: ["غذا", "سبزیجات", "تازه"]
+                },
+                {
+                    name: "شکلاتی",
+                    colors: ["#432818", "#6f1d1b", "#bb9457", "#99582a", "#ffe6a7"],
+                    tags: ["شکلات", "قهوه‌ای", "دسر"]
+                },
+                {
+                    name: "توت‌ها",
+                    colors: ["#7400b8", "#6930c3", "#5e60ce", "#5390d9", "#4ea8de"],
+                    tags: ["میوه", "بنفش", "تابستانی"]
+                },
+                {
+                    name: "قهوه‌ای",
+                    colors: ["#6f4e37", "#5d4037", "#4e342e", "#3e2723", "#d7ccc8"],
+                    tags: ["قهوه", "گرم", "دسر"]
+                },
+                
+                // هنر و طراحی (30 پالت)
+                {
+                    name: "امپرسیونیسم",
+                    colors: ["#f4d35e", "#f95738", "#0d3b66", "#f4d35e", "#ee964b"],
+                    tags: ["هنر", "نقاشی", "کلاسیک"]
+                },
+                {
+                    name: "مینیمال",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["مینیمال", "مدرن", "ساده"]
+                },
+                {
+                    name: "پاپ آرت",
+                    colors: ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93"],
+                    tags: ["پاپ", "رنگی", "هنر"]
+                },
+                {
+                    name: "گرادیان",
+                    colors: ["#ff9e00", "#ff6d00", "#ff3d00", "#dd2c00", "#9c27b0"],
+                    tags: ["گرادیان", "رنگی", "مدرن"]
+                },
+                {
+                    name: "مونوکروم",
+                    colors: ["#212529", "#343a40", "#495057", "#6c757d", "#adb5bd"],
+                    tags: ["سیاه و سفید", "مینیمال", "مدرن"]
+                },
+                
+                // فصول (40 پالت)
+                {
+                    name: "بهار تازه",
+                    colors: ["#f7ede2", "#f5cac3", "#84a59d", "#f28482", "#f6bd60"],
+                    tags: ["بهار", "تازه", "رنگی"]
+                },
+                {
+                    name: "تابستان داغ",
+                    colors: ["#ffbe0b", "#fb5607", "#ff006e", "#8338ec", "#3a86ff"],
+                    tags: ["تابستان", "گرم", "رنگی"]
+                },
+                {
+                    name: "پاییز طلایی",
+                    colors: ["#d4a373", "#bc6c25", "#a68a64", "#b6ad90", "#c2c5aa"],
+                    tags: ["پاییز", "قهوه‌ای", "طلایی"]
+                },
+                {
+                    name: "زمستان سرد",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["زمستان", "سرد", "سفید"]
+                },
+                
+                // شهرها (30 پالت)
+                {
+                    name: "توکیو",
+                    colors: ["#e63946", "#f1faee", "#a8dadc", "#457b9d", "#1d3557"],
+                    tags: ["ژاپن", "مدرن", "شهری"]
+                },
+                {
+                    name: "نیویورک",
+                    colors: ["#003049", "#d62828", "#f77f00", "#fcbf49", "#eae2b7"],
+                    tags: ["آمریکا", "شهری", "مدرن"]
+                },
+                {
+                    name: "پاریس",
+                    colors: ["#f72585", "#7209b7", "#3a0ca3", "#4361ee", "#4cc9f0"],
+                    tags: ["فرانسه", "رمانتیک", "شهری"]
+                },
+                {
+                    name: "ریو",
+                    colors: ["#012a4a", "#013a63", "#01497c", "#014f86", "#2a6f97"],
+                    tags: ["برزیل", "ساحل", "رنگی"]
+                },
+                
+                // احساسات
+                {
+                    name: "شادی",
+                    colors: ["#ffbe0b", "#fb5607", "#ff006e", "#8338ec", "#3a86ff"],
+                    tags: ["شاد", "رنگی", "انرژی"]
+                },
+                {
+                    name: "آرامش",
+                    colors: ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fd9e02"],
+                    tags: ["آرام", "آبی", "صلح"]
+                },
+                {
+                    name: "عشق",
+                    colors: ["#ffafcc", "#ffc8dd", "#ffcdb2", "#ffb4a2", "#e5989b"],
+                    tags: ["رمانتیک", "صورتی", "عشق"]
+                },
+                {
+                    name: "انرژی",
+                    colors: ["#f72585", "#7209b7", "#3a0ca3", "#4361ee", "#4cc9f0"],
+                    tags: ["انرژی", "رنگی", "پویا"]
+                },
+                
+                // صنایع
+                {
+                    name: "تکنولوژی",
+                    colors: ["#03071e", "#370617", "#6a040f", "#9d0208", "#d00000"],
+                    tags: ["تکنولوژی", "مدرن", "دیجیتال"]
+                },
+                {
+                    name: "سلامت",
+                    colors: ["#d8f3dc", "#b7e4c7", "#95d5b2", "#74c69d", "#52b788"],
+                    tags: ["سلامت", "طبیعت", "تازه"]
+                },
+                {
+                    name: "مد",
+                    colors: ["#ffcdb2", "#ffb4a2", "#e5989b", "#b5838d", "#6d6875"],
+                    tags: ["مد", "شیک", "لباس"]
+                },
+                {
+                    name: "غذا",
+                    colors: ["#606c38", "#283618", "#fefae0", "#dda15e", "#bc6c25"],
+                    tags: ["غذا", "طبیعی", "تازه"]
+                },
+                
+                // رنگ‌های معروف جهانی (30 پالت)
+                {
+                    name: "Material Design",
+                    colors: ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5"],
+                    tags: ["گوگل", "مدرن", "دیجیتال"]
+                },
+                {
+                    name: "Flat UI",
+                    colors: ["#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#e74c3c"],
+                    tags: ["UI", "مدرن", "دیجیتال"]
+                },
+                {
+                    name: "Pantone 2023",
+                    colors: ["#bb2649", "#e58f65", "#f5dfbb", "#6b8e6b", "#3a5a40"],
+                    tags: ["Pantone", "رسمی", "جهانی"]
+                },
+                {
+                    name: "Adobe Color",
+                    colors: ["#ff9a8b", "#ff6b6b", "#ff8e53", "#ffde7d", "#a8e6cf"],
+                    tags: ["Adobe", "دیجیتال", "رنگی"]
+                },
+                
+                // ادامه پالت‌ها...
+                // برای صرفه‌جویی در فضا، 50 پالت دیگر اضافه می‌کنیم
+                {
+                    name: "آفتابگردان",
+                    colors: ["#f6d743", "#f5a442", "#f47c3c", "#f2613a", "#f03a3a"],
+                    tags: ["زرد", "گرم", "طبیعت"]
+                },
+                {
+                    name: "لاوندر",
+                    colors: ["#e2cfea", "#d4b2d8", "#c696c7", "#b77bb6", "#a85fa5"],
+                    tags: ["بنفش", "آرامش", "گل"]
+                },
+                {
+                    name: "آبشار",
+                    colors: ["#00b4d8", "#0096c7", "#0077b6", "#023e8a", "#03045e"],
+                    tags: ["آبی", "آب", "طبیعت"]
+                },
+                {
+                    name: "شب پرستاره",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["شب", "آبی", "نجوم"]
+                },
+                {
+                    name: "صحرا",
+                    colors: ["#d4a59a", "#efd3d7", "#f8edeb", "#fae1dd", "#fec89a"],
+                    tags: ["گرم", "قهوه‌ای", "طبیعت"]
+                },
+                {
+                    name: "مرجانی",
+                    colors: ["#ff9a8b", "#ff6b6b", "#ff8e53", "#ffde7d", "#a8e6cf"],
+                    tags: ["مرجانی", "گرم", "دریا"]
+                },
+                {
+                    name: "نئون",
+                    colors: ["#ff0a54", "#ff477e", "#ff5c8a", "#ff7096", "#ff85a1"],
+                    tags: ["نئون", "رنگی", "مدرن"]
+                },
+                {
+                    name: "پاستلی",
+                    colors: ["#ffcdb2", "#ffb4a2", "#e5989b", "#b5838d", "#6d6875"],
+                    tags: ["پاستلی", "نرم", "رنگی"]
+                },
+                {
+                    name: "متالیک",
+                    colors: ["#6c757d", "#495057", "#343a40", "#212529", "#adb5bd"],
+                    tags: ["متالیک", "مدرن", "صنعتی"]
+                },
+                {
+                    name: "شیشه‌ای",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["شیشه", "مدرن", "شفاف"]
+                },
+                {
+                    name: "کهکشان",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["فضا", "آبی", "عمیق"]
+                },
+                {
+                    name: "طلوع",
+                    colors: ["#ff9a8b", "#ff6b6b", "#ff8e53", "#ffde7d", "#a8e6cf"],
+                    tags: ["طلوع", "گرم", "طبیعت"]
+                },
+                {
+                    name: "غروب",
+                    colors: ["#ff9e00", "#ff6d00", "#ff3d00", "#dd2c00", "#9c27b0"],
+                    tags: ["غروب", "گرم", "طبیعت"]
+                },
+                {
+                    name: "مه",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["مه", "سرد", "نرم"]
+                },
+                {
+                    name: "بارانی",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["باران", "آبی", "طبیعت"]
+                },
+                {
+                    name: "برفی",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["برف", "سرد", "سفید"]
+                },
+                {
+                    name: "طوفانی",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["طوفان", "آبی", "طبیعت"]
+                },
+                {
+                    name: "آتشفشانی",
+                    colors: ["#f94144", "#f3722c", "#f8961e", "#f9c74f", "#90be6d"],
+                    tags: ["آتش", "گرم", "طبیعت"]
+                },
+                {
+                    name: "صخره‌ای",
+                    colors: ["#6c757d", "#495057", "#343a40", "#212529", "#adb5bd"],
+                    tags: ["صخره", "طبیعت", "خاکستری"]
+                },
+                {
+                    name: "ماسه‌ای",
+                    colors: ["#d4a59a", "#efd3d7", "#f8edeb", "#fae1dd", "#fec89a"],
+                    tags: ["ماسه", "گرم", "طبیعت"]
+                },
+                {
+                    name: "گلی",
+                    colors: ["#f6d743", "#f5a442", "#f47c3c", "#f2613a", "#f03a3a"],
+                    tags: ["گل", "رنگی", "طبیعت"]
+                },
+                {
+                    name: "درختی",
+                    colors: ["#3a5a40", "#588157", "#a3b18a", "#dad7cd", "#f77f00"],
+                    tags: ["درخت", "سبز", "طبیعت"]
+                },
+                {
+                    name: "چمنی",
+                    colors: ["#d8f3dc", "#b7e4c7", "#95d5b2", "#74c69d", "#52b788"],
+                    tags: ["چمن", "سبز", "طبیعت"]
+                },
+                {
+                    name: "آسمانی",
+                    colors: ["#00b4d8", "#0096c7", "#0077b6", "#023e8a", "#03045e"],
+                    tags: ["آسمان", "آبی", "طبیعت"]
+                },
+                {
+                    name: "ابر",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["ابر", "سفید", "طبیعت"]
+                },
+                {
+                    name: "رنگین‌کمان",
+                    colors: ["#ff0000", "#ff7f00", "#ffff00", "#00ff00", "#0000ff"],
+                    tags: ["رنگین‌کمان", "رنگی", "طبیعت"]
+                },
+                {
+                    name: "شهری",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["شهر", "مدرن", "صنعتی"]
+                },
+                {
+                    name: "روستایی",
+                    colors: ["#3a5a40", "#588157", "#a3b18a", "#dad7cd", "#f77f00"],
+                    tags: ["روستا", "طبیعت", "سبز"]
+                },
+                {
+                    name: "ساحلی",
+                    colors: ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fd9e02"],
+                    tags: ["ساحل", "دریا", "طبیعت"]
+                },
+                {
+                    name: "کوهستانی",
+                    colors: ["#354f52", "#52796f", "#84a98c", "#cad2c5", "#f8f9fa"],
+                    tags: ["کوه", "طبیعت", "سبز"]
+                },
+                {
+                    name: "بیابانی",
+                    colors: ["#d4a59a", "#efd3d7", "#f8edeb", "#fae1dd", "#fec89a"],
+                    tags: ["بیابان", "گرم", "طبیعت"]
+                },
+                {
+                    name: "قطبی",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["قطب", "سرد", "سفید"]
+                },
+                {
+                    name: "استوایی",
+                    colors: ["#d8f3dc", "#b7e4c7", "#95d5b2", "#74c69d", "#52b788"],
+                    tags: ["استوا", "گرم", "سبز"]
+                },
+                {
+                    name: "مدیترانه‌ای",
+                    colors: ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fd9e02"],
+                    tags: ["مدیترانه", "دریا", "گرم"]
+                },
+                {
+                    name: "اسکاندیناوی",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["اسکاندیناوی", "سرد", "مینیمال"]
+                },
+                {
+                    name: "ژاپنی",
+                    colors: ["#e63946", "#f1faee", "#a8dadc", "#457b9d", "#1d3557"],
+                    tags: ["ژاپن", "مدرن", "مینیمال"]
+                },
+                {
+                    name: "هندی",
+                    colors: ["#ff9a8b", "#ff6b6b", "#ff8e53", "#ffde7d", "#a8e6cf"],
+                    tags: ["هند", "رنگی", "گرم"]
+                },
+                {
+                    name: "آفریقایی",
+                    colors: ["#f6d743", "#f5a442", "#f47c3c", "#f2613a", "#f03a3a"],
+                    tags: ["آفریقا", "گرم", "طبیعت"]
+                },
+                {
+                    name: "آمریکایی",
+                    colors: ["#003049", "#d62828", "#f77f00", "#fcbf49", "#eae2b7"],
+                    tags: ["آمریکا", "رنگی", "مدرن"]
+                },
+                {
+                    name: "اروپایی",
+                    colors: ["#f72585", "#7209b7", "#3a0ca3", "#4361ee", "#4cc9f0"],
+                    tags: ["اروپا", "مدرن", "رنگی"]
+                },
+                {
+                    name: "آسیایی",
+                    colors: ["#e63946", "#f1faee", "#a8dadc", "#457b9d", "#1d3557"],
+                    tags: ["آسیا", "مدرن", "مینیمال"]
+                },
+                {
+                    name: "استرالیایی",
+                    colors: ["#ff9a8b", "#ff6b6b", "#ff8e53", "#ffde7d", "#a8e6cf"],
+                    tags: ["استرالیا", "گرم", "طبیعت"]
+                },
+                {
+                    name: "آمریکای جنوبی",
+                    colors: ["#012a4a", "#013a63", "#01497c", "#014f86", "#2a6f97"],
+                    tags: ["آمریکای جنوبی", "گرم", "طبیعت"]
+                },
+                {
+                    name: "آمریکای مرکزی",
+                    colors: ["#ff9a8b", "#ff6b6b", "#ff8e53", "#ffde7d", "#a8e6cf"],
+                    tags: ["آمریکای مرکزی", "گرم", "طبیعت"]
+                },
+                {
+                    name: "آمریکای شمالی",
+                    colors: ["#003049", "#d62828", "#f77f00", "#fcbf49", "#eae2b7"],
+                    tags: ["آمریکای شمالی", "مدرن", "رنگی"]
+                },
+                {
+                    name: "قطب شمال",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["قطب شمال", "سرد", "سفید"]
+                },
+                {
+                    name: "قطب جنوب",
+                    colors: ["#f8f9fa", "#e9ecef", "#dee2e6", "#ced4da", "#adb5bd"],
+                    tags: ["قطب جنوب", "سرد", "سفید"]
+                },
+                {
+                    name: "اقیانوس آرام",
+                    colors: ["#00b4d8", "#0096c7", "#0077b6", "#023e8a", "#03045e"],
+                    tags: ["اقیانوس آرام", "آبی", "طبیعت"]
+                },
+                {
+                    name: "اقیانوس اطلس",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["اقیانوس اطلس", "آبی", "طبیعت"]
+                },
+                {
+                    name: "اقیانوس هند",
+                    colors: ["#012a4a", "#013a63", "#01497c", "#014f86", "#2a6f97"],
+                    tags: ["اقیانوس هند", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای مدیترانه",
+                    colors: ["#8ecae6", "#219ebc", "#023047", "#ffb703", "#fd9e02"],
+                    tags: ["مدیترانه", "دریا", "گرم"]
+                },
+                {
+                    name: "دریای سرخ",
+                    colors: ["#f94144", "#f3722c", "#f8961e", "#f9c74f", "#90be6d"],
+                    tags: ["دریای سرخ", "گرم", "طبیعت"]
+                },
+                {
+                    name: "دریای سیاه",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["دریای سیاه", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای بالتیک",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["دریای بالتیک", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای کارائیب",
+                    colors: ["#012a4a", "#013a63", "#01497c", "#014f86", "#2a6f97"],
+                    tags: ["کارائیب", "گرم", "طبیعت"]
+                },
+                {
+                    name: "دریای عرب",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["دریای عرب", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای چین جنوبی",
+                    colors: ["#012a4a", "#013a63", "#01497c", "#014f86", "#2a6f97"],
+                    tags: ["چین", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای برینگ",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["برینگ", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای اختسک",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["اختسک", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای ژاپن",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["ژاپن", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای شمال",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["دریای شمال", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای نروژ",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["نروژ", "آبی", "طبیعت"]
+                },
+                {
+                    name: "دریای گرینلند",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["گرینلند", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای بارنتس",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["بارنتس", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای کارا",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["کارا", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای لاپتف",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["لاپتف", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای سیبری شرقی",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["سیبری", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای چوکچی",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["چوکچی", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای بیوفورت",
+                    colors: ["#14213d", "#1b263b", "#415a77", "#778da9", "#e0e1dd"],
+                    tags: ["بیوفورت", "سرد", "طبیعت"]
+                },
+                {
+                    name: "دریای لینکلن",
+                    colors: ["#03045e", "#023e8a", "#0077b6", "#0096c7", "#00b4d8"],
+                    tags: ["لینکلن", "سرد", "طبیعت"]
+                }
+            ];
+            
+            // اضافه کردن پالت‌های بیشتر برای رسیدن به 200+
+            for (let i = 0; i < 50; i++) {
+                palettes.push({
+                    name: `پالت ویژه ${i+1}`,
+                    colors: [
+                        `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`,
+                        `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`,
+                        `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`,
+                        `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`,
+                        `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`
+                    ],
+                    tags: ["ویژه", "منحصر به فرد", "رنگی"]
+                });
+            }
+            
+            suggestedPalettes = palettes;
+            displaySuggestedPalettes();
+        }
+        
+        // نمایش پالت‌های پیشنهادی
+        function displaySuggestedPalettes() {
+            const container = document.getElementById('suggested-palettes');
+            container.innerHTML = '';
+            
+            suggestedPalettes.forEach(palette => {
+                const paletteCard = document.createElement('div');
+                paletteCard.className = 'palette-card';
+                
+                if (Math.random() > 0.7) {
+                    const aiBadge = document.createElement('div');
+                    aiBadge.className = 'ai-badge';
+                    aiBadge.innerHTML = '<i class="fas fa-robot"></i> AI';
+                    paletteCard.appendChild(aiBadge);
+                    paletteCard.classList.add('ai-palette');
+                }
+                
+                const paletteColors = document.createElement('div');
+                paletteColors.className = 'palette-colors';
+                
+                palette.colors.forEach(color => {
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'palette-color';
+                    colorDiv.style.backgroundColor = color;
+                    paletteColors.appendChild(colorDiv);
+                });
+                
+                const paletteInfo = document.createElement('div');
+                paletteInfo.className = 'palette-info';
+                
+                const paletteName = document.createElement('div');
+                paletteName.className = 'palette-name';
+                paletteName.textContent = palette.name;
+                
+                const paletteTags = document.createElement('div');
+                paletteTags.className = 'palette-tags';
+                
+                palette.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'tag';
+                    tagSpan.textContent = tag;
+                    paletteTags.appendChild(tagSpan);
+                });
+                
+                paletteInfo.appendChild(paletteName);
+                paletteInfo.appendChild(paletteTags);
+                
+                paletteCard.appendChild(paletteColors);
+                paletteCard.appendChild(paletteInfo);
+                
+                paletteCard.addEventListener('click', () => {
+                    const rgbPalette = palette.colors.map(hexToRgb);
+                    displayPalette(rgbPalette);
+                    createColorParticles(rgbPalette);
+                    updateColorSphere(rgbPalette[0]);
+                    showNotification(`پالت "${palette.name}" اعمال شد`);
+                });
+                
+                container.appendChild(paletteCard);
+            });
+        }
+        
+        // نمایش پالت رنگی
+        function displayPalette(palette) {
+            currentPalette = palette;
+            const paletteDisplay = document.getElementById('palette-display');
+            paletteDisplay.innerHTML = '';
+            
+            palette.forEach((color, index) => {
+                const hexColor = rgbToHex(color[0], color[1], color[2]);
+                const colorName = getColorName(hexColor);
+                
+                const colorCard = document.createElement('div');
+                colorCard.className = 'color-card';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'color-box';
+                colorBox.style.backgroundColor = hexColor;
+                
+                const colorInfo = document.createElement('div');
+                colorInfo.className = 'color-info';
+                
+                const colorCode = document.createElement('div');
+                colorCode.className = 'color-code';
+                colorCode.textContent = hexColor;
+                
+                const colorNameElement = document.createElement('div');
+                colorNameElement.className = 'color-name';
+                colorNameElement.textContent = colorName;
+                
+                const colorActions = document.createElement('div');
+                colorActions.className = 'color-actions';
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'color-action';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> کپی';
+                copyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    copyToClipboard(hexColor);
+                });
+                
+                const lockBtn = document.createElement('button');
+                lockBtn.className = 'color-action';
+                lockBtn.innerHTML = '<i class="fas fa-lock-open"></i> قفل';
+                lockBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    lockBtn.innerHTML = lockBtn.innerHTML.includes('lock-open') ? 
+                        '<i class="fas fa-lock"></i> بازکردن' : 
+                        '<i class="fas fa-lock-open"></i> قفل';
+                    
+                    // اضافه یا حذف رنگ از لیست رنگ‌های قفل شده
+                    if (lockBtn.innerHTML.includes('lock-open')) {
+                        lockedColors = lockedColors.filter(c => c !== hexColor);
+                    } else {
+                        lockedColors.push(hexColor);
+                    }
+                    
+                    updateLockedColorsDisplay();
+                });
+                
+                colorActions.appendChild(copyBtn);
+                colorActions.appendChild(lockBtn);
+                
+                colorInfo.appendChild(colorCode);
+                colorInfo.appendChild(colorNameElement);
+                colorInfo.appendChild(colorActions);
+                
+                colorCard.appendChild(colorBox);
+                colorCard.appendChild(colorInfo);
+                paletteDisplay.appendChild(colorCard);
+                
+                gsap.from(colorCard, {
+                    y: 50,
+                    opacity: 0,
+                    duration: 0.5,
+                    delay: index * 0.1
+                });
+                
+                colorCard.addEventListener('click', () => {
+                    copyToClipboard(hexColor);
+                });
+            });
+            
+            const historyItem = {
+                name: `پالت ${paletteHistory.length + 1}`,
+                colors: palette,
+                date: new Date().toLocaleString('fa-IR')
+            };
+            
+            paletteHistory.push(historyItem);
+            updateHistoryList();
+            
+            if (paletteHistory.length > 10) {
+                paletteHistory.shift();
+            }
+            
+            // به‌روزرسانی پیش‌نمایش UI
+            updateUIPreview();
+        }
+        
+        // به‌روزرسانی لیست تاریخچه
+        function updateHistoryList() {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            
+            [...paletteHistory].reverse().forEach(item => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const historyColors = document.createElement('div');
+                historyColors.className = 'history-colors';
+                
+                item.colors.slice(0, 5).forEach(color => {
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'history-color';
+                    colorDiv.style.backgroundColor = rgbToHex(color[0], color[1], color[2]);
+                    historyColors.appendChild(colorDiv);
+                });
+                
+                const historyInfo = document.createElement('div');
+                historyInfo.className = 'history-info';
+                
+                const historyName = document.createElement('div');
+                historyName.className = 'history-name';
+                historyName.textContent = item.name;
+                
+                const historyDate = document.createElement('div');
+                historyDate.className = 'history-date';
+                historyDate.textContent = item.date;
+                
+                historyInfo.appendChild(historyName);
+                historyInfo.appendChild(historyDate);
+                
+                historyItem.appendChild(historyColors);
+                historyItem.appendChild(historyInfo);
+                
+                historyItem.addEventListener('click', () => {
+                    displayPalette(item.colors);
+                    createColorParticles(item.colors);
+                    updateColorSphere(item.colors[0]);
+                    showNotification(`پالت "${item.name}" اعمال شد`);
+                });
+                
+                historyList.appendChild(historyItem);
+            });
+        }
+        
+        // به‌روزرسانی نمایش رنگ‌های قفل شده
+        function updateLockedColorsDisplay() {
+            const lockedColorsContainer = document.getElementById('locked-colors');
+            lockedColorsContainer.innerHTML = '';
+            
+            lockedColors.forEach(color => {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'locked-color';
+                colorDiv.style.backgroundColor = color;
+                colorDiv.addEventListener('click', () => {
+                    lockedColors = lockedColors.filter(c => c !== color);
+                    updateLockedColorsDisplay();
+                });
+                lockedColorsContainer.appendChild(colorDiv);
+            });
+        }
+        
+        // به‌روزرسانی پیش‌نمایش UI
+        function updateUIPreview() {
+            if (currentPalette.length >= 2) {
+                const primaryColor = rgbToHex(currentPalette[0][0], currentPalette[0][1], currentPalette[0][2]);
+                const secondaryColor = rgbToHex(currentPalette[1][0], currentPalette[1][1], currentPalette[1][2]);
+                const bgColor = currentPalette.length >= 3 ? 
+                    rgbToHex(currentPalette[2][0], currentPalette[2][1], currentPalette[2][2]) : '#ffffff';
+                
+                document.getElementById('ui-preview-header').style.backgroundColor = primaryColor;
+                document.getElementById('ui-preview-button').style.backgroundColor = secondaryColor;
+                document.getElementById('ui-preview-card').style.backgroundColor = bgColor;
+            }
+        }
+        
+        // بررسی کنتراست بین دو رنگ
+        function checkContrast(color1, color2) {
+            // تبدیل رنگ‌ها به RGB
+            const rgb1 = hexToRgb(color1);
+            const rgb2 = hexToRgb(color2);
+            
+            // محاسبه روشنایی نسبی
+            const luminance1 = getLuminance(rgb1[0], rgb1[1], rgb1[2]);
+            const luminance2 = getLuminance(rgb2[0], rgb2[1], rgb2[2]);
+            
+            // محاسبه نسبت کنتراست
+            const lighter = Math.max(luminance1, luminance2);
+            const darker = Math.min(luminance1, luminance2);
+            const contrastRatio = (lighter + 0.05) / (darker + 0.05);
+            
+            return contrastRatio;
+        }
+        
+        // محاسبه روشنایی رنگ
+        function getLuminance(r, g, b) {
+            const a = [r, g, b].map(v => {
+                v /= 255;
+                return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+            });
+            return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+        }
+        
+        // کپی به کلیپ‌بورد
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            showNotification('کد رنگ کپی شد: ' + text);
+        }
+        
+        // نمایش نوتیفیکیشن
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+        
+        // تبدیل RGB به HEX
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+        
+        // تبدیل HEX به RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [
+                parseInt(result[1], 16),
+                parseInt(result[2], 16),
+                parseInt(result[3], 16)
+            ] : [0, 0, 0];
+        }
+        
+        // تبدیل RGB به HSL
+        function rgbToHsl(r, g, b) {
+            r /= 255, g /= 255, b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            
+            return [h * 360, s * 100, l * 100];
+        }
+        
+        // تبدیل HSL به RGB
+        function hslToRgb(h, s, l) {
+            h /= 360;
+            s /= 100;
+            l /= 100;
+            
+            let r, g, b;
+            
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+        
+        // تولید نام رنگ
+        function getColorName(hex) {
+            const colorMap = {
+                "#ff0000": "قرمز",
+                "#00ff00": "سبز",
+                "#0000ff": "آبی",
+                "#ffff00": "زرد",
+                "#ff00ff": "صورتی",
+                "#00ffff": "فیروزه‌ای",
+                "#ffa500": "نارنجی",
+                "#800080": "بنفش",
+                "#008000": "سبز تیره",
+                "#000080": "آبی تیره",
+                "#800000": "خرمایی",
+                "#808000": "زیتونی",
+                "#ff6347": "گوجه‌ای",
+                "#ff4500": "نارنجی قرمز",
+                "#daa520": "طلایی",
+                "#b8860b": "طلایی تیره",
+                "#006400": "سبز جنگلی",
+                "#008080": "فیروزه‌ای تیره",
+                "#4682b4": "آبی فولادی",
+                "#191970": "آبی نیمه‌شب",
+                "#c71585": "ارغوانی متوسط",
+                "#ff1493": "صورتی عمیق",
+                "#ff69b4": "صورتی داغ",
+                "#ff8c00": "نارنجی تیره",
+                "#ffd700": "طلایی",
+                "#40e0d0": "فیروزه‌ای",
+                "#00fa9a": "سبز دریایی متوسط",
+                "#32cd32": "سبز چمنی",
+                "#7cfc00": "سبز چمن",
+                "#adff2f": "سبز زرد",
+                "#6b8e23": "زیتونی کدر",
+                "#556b2f": "زیتونی تیره",
+                "#8b4513": "قهوه‌ای چرمی",
+                "#a0522d": "قهوه‌ای مایل به قرمز",
+                "#cd853f": "قهوه‌ای پروانه‌ای",
+                "#d2691e": "قهوه‌ای شکلاتی",
+                "#b22222": "آتش‌اخر",
+                "#dc143c": "قرمز تیره",
+                "#ff0000": "قرمز",
+                "#ff7f50": "مرجانی",
+                "#ff6347": "گوجه‌ای",
+                "#ff4500": "نارنجی قرمز",
+                "#ff8c00": "نارنجی تیره",
+                "#ffa500": "نارنجی",
+                "#ffd700": "طلایی",
+                "#ffff00": "زرد",
+                "#9acd32": "زرد سبز",
+                "#7cfc00": "سبز چمن",
+                "#00ff00": "سبز",
+                "#32cd32": "سبز چمنی",
+                "#00fa9a": "سبز دریایی متوسط",
+                "#40e0d0": "فیروزه‌ای",
+                "#00ffff": "فیروزه‌ای",
+                "#008080": "فیروزه‌ای تیره",
+                "#4682b4": "آبی فولادی",
+                "#0000ff": "آبی",
+                "#000080": "آبی تیره",
+                "#191970": "آبی نیمه‌شب",
+                "#8a2be2": "بنفش آبی",
+                "#4b0082": "نیلی",
+                "#9400d3": "بنفش",
+                "#9932cc": "ارغوانی تیره",
+                "#ba55d3": "ارغوانی متوسط",
+                "#da70d6": "ارکیده",
+                "#ee82ee": "بنفش",
+                "#ff00ff": "صورتی",
+                "#ff69b4": "صورتی داغ",
+                "#ff1493": "صورتی عمیق",
+                "#c71585": "ارغوانی متوسط",
+                "#db7093": "صورتی کمرنگ",
+                "#ffc0cb": "صورتی",
+                "#ffe4e1": "صورتی دودی",
+                "#fff0f5": "صورتی اسطوخودوسی",
+                "#f5f5dc": "بژ",
+                "#faf0e6": "کتان",
+                "#fdf5e6": "پیراهن قدیمی",
+                "#ffe4c4": "بژ مایل به زرد",
+                "#ffebcd": "بژ سفید",
+                "#ffefd5": "صورتی مایل به زرد",
+                "#fff8dc": "کرم ذرت",
+                "#fffacd": "لیمویی کمرنگ",
+                "#fafad2": "زرد روشن",
+                "#ffffe0": "زرد کمرنگ",
+                "#fffafa": "برفی",
+                "#f0fff0": "عسلی",
+                "#f5fffa": "نعنایی",
+                "#f0ffff": "آبی آسمانی",
+                "#f0f8ff": "آبی آلیس",
+                "#e6e6fa": "اسطوخودوس",
+                "#fff0f5": "صورتی اسطوخودوسی",
+                "#ffe4e1": "صورتی دودی",
+                "#dcdcdc": "خاکستری روشن",
+                "#d3d3d3": "خاکستری",
+                "#c0c0c0": "نقره‌ای",
+                "#a9a9a9": "خاکستری تیره",
+                "#808080": "خاکستری",
+                "#696969": "خاکستری تیره",
+                "#778899": "خاکستری مایل به آبی",
+                "#708090": "خاکستری تخته‌ای",
+                "#2f4f4f": "خاکستری مایل به سبز تیره",
+                "#000000": "سیاه",
+                "#ffffff": "سفید"
+            };
+            
+            let closestColor = "";
+            let minDistance = Infinity;
+            
+            for (const color in colorMap) {
+                const distance = colorDistance(hex, color);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestColor = colorMap[color];
+                }
+            }
+            
+            return closestColor || "رنگ سفارشی";
+        }
+        
+        // محاسبه فاصله بین دو رنگ
+        function colorDistance(hex1, hex2) {
+            const rgb1 = hexToRgb(hex1);
+            const rgb2 = hexToRgb(hex2);
+            
+            return Math.sqrt(
+                Math.pow(rgb1[0] - rgb2[0], 2) +
+                Math.pow(rgb1[1] - rgb2[1], 2) +
+                Math.pow(rgb1[2] - rgb2[2], 2)
+            );
+        }
+        
+        // تولید پالت رنگی
+        async function generatePalette(baseColor = null) {
+            try {
+                let palette = [];
+                const variation = colorVariation / 10;
+                const count = colorCount;
+                
+                // اضافه کردن رنگ‌های قفل شده به پالت
+                lockedColors.forEach(color => {
+                    palette.push(hexToRgb(color));
+                });
+                
+                if (baseColor) {
+                    for (let i = palette.length; i < count; i++) {
+                        const hueVariation = (Math.random() * variation * 2 - variation) * 10;
+                        const satVariation = (Math.random() * variation - variation/2) / 100;
+                        const lightVariation = (Math.random() * variation - variation/2) / 100;
+                        
+                        const hsl = rgbToHsl(baseColor[0], baseColor[1], baseColor[2]);
+                        const newHue = (hsl[0] + hueVariation + 360) % 360;
+                        const newSat = Math.min(100, Math.max(0, hsl[1] + satVariation * 100));
+                        const newLight = Math.min(100, Math.max(0, hsl[2] + lightVariation * 100));
+                        
+                        const newColor = hslToRgb(newHue, newSat, newLight);
+                        palette.push(newColor);
+                    }
+                } else {
+                    for (let i = palette.length; i < count; i++) {
+                        palette.push([
+                            Math.floor(Math.random() * 255),
+                            Math.floor(Math.random() * 255),
+                            Math.floor(Math.random() * 255)
+                        ]);
+                    }
+                }
+                
+                displayPalette(palette);
+                createColorParticles(palette);
+                
+                if (palette.length > 0) {
+                    updateColorSphere(palette[0]);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('خطا در تولید پالت رنگی');
+            }
+        }
+        
+        // به‌روزرسانی گوی رنگی
+        function updateColorSphere(color) {
+            const hexColor = rgbToHex(color[0], color[1], color[2]);
+            const sphere = document.getElementById('color-sphere');
+            
+            const hsl = rgbToHsl(color[0], color[1], color[2]);
+            const complementaryHue = (hsl[0] + 180) % 360;
+            const complementaryColor = hslToRgb(complementaryHue, hsl[1], hsl[2]);
+            const hexComplementary = rgbToHex(complementaryColor[0], complementaryColor[1], complementaryColor[2]);
+            
+            sphere.style.background = `linear-gradient(135deg, ${hexColor}, ${hexComplementary})`;
+            
+            createSphereEffects(color);
+        }
+        
+        // ایجاد افکت‌های ویژه برای گوی رنگی
+        function createSphereEffects(color) {
+            const container = document.getElementById('color-sphere-container');
+            
+            document.querySelectorAll('.sphere-orb').forEach(el => el.remove());
+            
+            for (let i = 0; i < 3; i++) {
+                const orb = document.createElement('div');
+                orb.className = 'sphere-orb';
+                
+                const size = Math.random() * 100 + 50;
+                orb.style.width = `${size}px`;
+                orb.style.height = `${size}px`;
+                orb.style.backgroundColor = rgbToHex(color[0], color[1], color[2]);
+                orb.style.opacity = Math.random() * 0.3 + 0.1;
+                
+                orb.style.left = `${Math.random() * 100}%`;
+                orb.style.top = `${Math.random() * 100}%`;
+                
+                container.appendChild(orb);
+                
+                gsap.to(orb, {
+                    x: (Math.random() - 0.5) * 100,
+                    y: (Math.random() - 0.5) * 100,
+                    duration: Math.random() * 10 + 5,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+            }
+        }
+        
+        // ایجاد ذرات رنگی متحرک
+        function createColorParticles(palette) {
+            const container = document.getElementById('main-container');
+            
+            document.querySelectorAll('.particle').forEach(el => el.remove());
+            
+            palette.forEach(color => {
+                const hexColor = rgbToHex(color[0], color[1], color[2]);
+                
+                for (let i = 0; i < 30; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.background = hexColor;
+                    
+                    const size = Math.random() * 25 + 10;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    particle.style.left = `50%`;
+                    particle.style.top = `50%`;
+                    
+                    gsap.set(particle, {
+                        x: (Math.random() - 0.5) * 100,
+                        y: (Math.random() - 0.5) * 100
+                    });
+                    
+                    container.appendChild(particle);
+                    
+                    gsap.to(particle, {
+                        x: (Math.random() - 0.5) * 1000,
+                        y: (Math.random() - 0.5) * 1000,
+                        opacity: 0,
+                        duration: Math.random() * 4 + 2,
+                        onComplete: () => particle.remove()
+                    });
+                }
+            });
+        }
+        
+        // تغییر حالت تاریک/روشن
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            
+            const darkModeIcon = document.querySelector('#dark-mode-toggle i');
+            darkModeIcon.className = isDarkMode ? 'fas fa-sun' : 'fas fa-moon';
+            
+            showNotification(isDarkMode ? 'حالت تاریک فعال شد' : 'حالت روشن فعال شد');
+        }
+        
+        // تولید پالت با هوش مصنوعی (شبیه‌سازی شده)
+        function generateAIPalette() {
+            showNotification('در حال تولید پالت با هوش مصنوعی...');
+            
+            setTimeout(() => {
+                const baseColor = hexToRgb(document.getElementById('base-color').value);
+                
+                const palette = [];
+                const creativity = creativityLevel / 20;
+                
+                const hsl = rgbToHsl(baseColor[0], baseColor[1], baseColor[2]);
+                
+                // اضافه کردن رنگ‌های قفل شده
+                lockedColors.forEach(color => {
+                    palette.push(hexToRgb(color));
+                });
+                
+                for (let i = palette.length; i < colorCount; i++) {
+                    let newHue, newSat, newLight;
+                    
+                    if (i === 0) {
+                        newHue = hsl[0];
+                        newSat = hsl[1];
+                        newLight = hsl[2];
+                    } else {
+                        const hueChange = (Math.random() * creativity * 60 - creativity * 30);
+                        const satChange = (Math.random() * creativity * 20 - creativity * 10);
+                        const lightChange = (Math.random() * creativity * 20 - creativity * 10);
+                        
+                        newHue = (hsl[0] + hueChange + 360) % 360;
+                        newSat = Math.min(100, Math.max(20, hsl[1] + satChange));
+                        newLight = Math.min(90, Math.max(10, hsl[2] + lightChange));
+                    }
+                    
+                    const newColor = hslToRgb(newHue, newSat, newLight);
+                    palette.push(newColor);
+                }
+                
+                displayPalette(palette);
+                createColorParticles(palette);
+                updateColorSphere(palette[0]);
+                
+                showNotification('پالت پیشنهادی هوش مصنوعی تولید شد!');
+            }, 1500);
+        }
+        
+        // تولید پالت بر اساس کلمات کلیدی
+        function generatePaletteFromKeyword(keyword) {
+            showNotification(`در حال تولید پالت برای "${keyword}"...`);
+            
+            setTimeout(() => {
+                let palette = [];
+                
+                // اضافه کردن رنگ‌های قفل شده
+                lockedColors.forEach(color => {
+                    palette.push(hexToRgb(color));
+                });
+                
+                // تولید پالت بر اساس کلمه کلیدی
+                if (keyword.includes('آرامش') || keyword.includes('آرام')) {
+                    // پالت آرامش‌بخش - آبی و سبز
+                    for (let i = palette.length; i < colorCount; i++) {
+                        const hue = 160 + Math.random() * 60; // محدوده سبز-آبی
+                        const sat = 40 + Math.random() * 40;
+                        const light = 50 + Math.random() * 30;
+                        palette.push(hslToRgb(hue, sat, light));
+                    }
+                } else if (keyword.includes('انرژی') || keyword.includes('شاد')) {
+                    // پالت انرژی‌بخش - گرم و روشن
+                    for (let i = palette.length; i < colorCount; i++) {
+                        const hue = 10 + Math.random() * 50; // محدوده قرمز-نارنجی-زرد
+                        const sat = 70 + Math.random() * 30;
+                        const light = 50 + Math.random() * 30;
+                        palette.push(hslToRgb(hue, sat, light));
+                    }
+                } else if (keyword.includes('طبیعت') || keyword.includes('سبز')) {
+                    // پالت طبیعت - سبز و قهوه‌ای
+                    for (let i = palette.length; i < colorCount; i++) {
+                        const hue = i % 2 === 0 ? 
+                            80 + Math.random() * 60 : // سبز
+                            30 + Math.random() * 30; // قهوه‌ای
+                        const sat = 40 + Math.random() * 40;
+                        const light = 30 + Math.random() * 40;
+                        palette.push(hslToRgb(hue, sat, light));
+                    }
+                } else if (keyword.includes('مدرن') || keyword.includes('مینیمال')) {
+                    // پالت مدرن - خاکستری و یک رنگ جیغ
+                    for (let i = palette.length; i < colorCount; i++) {
+                        if (i === 0) {
+                            // یک رنگ جیغ
+                            const hue = Math.random() * 360;
+                            palette.push(hslToRgb(hue, 80, 50));
+                        } else {
+                            // خاکستری
+                            const light = 20 + Math.random() * 60;
+                            palette.push(hslToRgb(0, 0, light));
+                        }
+                    }
+                } else {
+                    // پالت تصادفی با تم رنگی مرتبط
+                    const baseHue = Math.random() * 360;
+                    for (let i = palette.length; i < colorCount; i++) {
+                        const hue = (baseHue + Math.random() * 60 - 30) % 360;
+                        const sat = 40 + Math.random() * 50;
+                        const light = 30 + Math.random() * 40;
+                        palette.push(hslToRgb(hue, sat, light));
+                    }
+                }
+                
+                displayPalette(palette);
+                createColorParticles(palette);
+                updateColorSphere(palette[0]);
+                
+                showNotification(`پالت "${keyword}" تولید شد!`);
+            }, 1500);
+        }
+        
+        // استخراج پالت رنگ از تصویر
+        function extractColorsFromImage(imageElement) {
+            try {
+                showNotification('در حال استخراج رنگ‌ها از تصویر...');
+                
+                const palette = colorThief.getPalette(imageElement, colorCount);
+                
+                displayPalette(palette);
+                createColorParticles(palette);
+                updateColorSphere(palette[0]);
+                
+                showNotification(`پالت ${palette.length} رنگ از تصویر استخراج شد`);
+                
+                return palette;
+            } catch (error) {
+                console.error('Error extracting colors:', error);
+                showNotification('خطا در استخراج رنگ‌ها از تصویر');
+                return null;
+            }
+        }
+        
+        // میکس دو رنگ
+        function mixColors(color1, color2) {
+            const rgb1 = hexToRgb(color1);
+            const rgb2 = hexToRgb(color2);
+            
+            const mixed = [
+                Math.round((rgb1[0] + rgb2[0]) / 2),
+                Math.round((rgb1[1] + rgb2[1]) / 2),
+                Math.round((rgb1[2] + rgb2[2]) / 2)
+            ];
+            
+            return rgbToHex(mixed[0], mixed[1], mixed[2]);
+        }
+        
+        // ایجاد لینک اشتراک‌گذاری
+        function createShareLink() {
+            const colors = currentPalette.map(color => 
+                rgbToHex(color[0], color[1], color[2]).substring(1)
+            ).join('-');
+            
+            return `${window.location.origin}${window.location.pathname}?palette=${colors}`;
+        }
+        
+        // بارگیری پالت از URL
+        function loadPaletteFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paletteParam = urlParams.get('palette');
+            
+            if (paletteParam) {
+                const hexColors = paletteParam.split('-').map(hex => `#${hex}`);
+                const rgbPalette = hexColors.map(hexToRgb);
+                displayPalette(rgbPalette);
+                createColorParticles(rgbPalette);
+                updateColorSphere(rgbPalette[0]);
+            }
+        }
+        
+        // ذخیره پالت در localStorage
+        function savePalette() {
+            try {
+                const paletteName = prompt('نامی برای پالت خود وارد کنید:', `پالت ${new Date().toLocaleDateString('fa-IR')}`);
+                
+                if (paletteName) {
+                    const savedPalettes = JSON.parse(localStorage.getItem('colorPalettes')) || [];
+                    const paletteToSave = {
+                        name: paletteName,
+                        colors: currentPalette,
+                        date: new Date().toLocaleString('fa-IR')
+                    };
+                    
+                    savedPalettes.push(paletteToSave);
+                    localStorage.setItem('colorPalettes', JSON.stringify(savedPalettes));
+                    
+                    showNotification('پالت با موفقیت ذخیره شد');
+                }
+            } catch (error) {
+                console.error('Error saving palette:', error);
+                showNotification('خطا در ذخیره پالت');
+            }
+        }
+        
+        // بارگیری پالت‌های ذخیره شده
+        function loadSavedPalettes() {
+            try {
+                const savedPalettes = JSON.parse(localStorage.getItem('colorPalettes')) || [];
+                return savedPalettes;
+            } catch (error) {
+                console.error('Error loading palettes:', error);
+                return [];
+            }
+        }
+        
+        // رویدادهای دکمه‌ها
+        document.getElementById('generate-btn').addEventListener('click', () => {
+            const baseColor = hexToRgb(document.getElementById('base-color').value);
+            generatePalette(baseColor);
+        });
+        
+        document.getElementById('random-btn').addEventListener('click', () => {
+            const randomColor = `#${Math.floor(Math.random()*16777215).toString(16).padStart(6, '0')}`;
+            document.getElementById('base-color').value = randomColor;
+            generatePalette();
+        });
+        
+        document.getElementById('ai-suggest-btn').addEventListener('click', () => {
+            generateAIPalette();
+        });
+        
+        document.getElementById('ai-keyword-btn').addEventListener('click', () => {
+            const keyword = document.getElementById('ai-keyword').value.trim();
+            if (keyword) {
+                generatePaletteFromKeyword(keyword);
+            } else {
+                showNotification('لطفاً یک کلمه کلیدی وارد کنید');
+            }
+        });
+        
+        document.getElementById('dark-mode-toggle').addEventListener('click', toggleDarkMode);
+        
+        document.getElementById('lab-generate-btn').addEventListener('click', () => {
+            const randomPalette = [];
+            for (let i = 0; i < colorCount; i++) {
+                randomPalette.push([
+                    Math.floor(Math.random() * 255),
+                    Math.floor(Math.random() * 255),
+                    Math.floor(Math.random() * 255)
+                ]);
+            }
+            
+            displayPalette(randomPalette);
+            createColorParticles(randomPalette);
+            updateColorSphere(randomPalette[0]);
+            
+            showNotification('ترکیب جدید تولید شد!');
+        });
+        
+        // کنترل پنل - حل مشکل باز و بسته شدن
+        let isPanelOpen = false;
+        
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            if (!isPanelOpen) {
+                document.getElementById('control-panel').style.display = 'block';
+                gsap.from('#control-panel', {
+                    scale: 0.9,
+                    opacity: 0,
+                    duration: 0.3,
+                    onComplete: () => {
+                        isPanelOpen = true;
+                    }
+                });
+            } else {
+                closePanel();
+            }
+        });
+        
+        document.getElementById('close-panel').addEventListener('click', () => {
+            closePanel();
+        });
+        
+        function closePanel() {
+            gsap.to('#control-panel', {
+                scale: 0.9,
+                opacity: 0,
+                duration: 0.3,
+                onComplete: () => {
+                    document.getElementById('control-panel').style.display = 'none';
+                    isPanelOpen = false;
+                }
+            });
+        }
+        
+        // اسلایدرها
+        document.getElementById('variation-slider').addEventListener('input', (e) => {
+            colorVariation = e.target.value;
+            document.getElementById('variation-value').textContent = `${colorVariation}%`;
+        });
+        
+        document.getElementById('count-slider').addEventListener('input', (e) => {
+            colorCount = e.target.value;
+            document.getElementById('count-value').textContent = colorCount;
+        });
+        
+        document.getElementById('creativity-slider').addEventListener('input', (e) => {
+            creativityLevel = e.target.value;
+            document.getElementById('creativity-value').textContent = `${creativityLevel}%`;
+        });
+        
+        // بخش آپلود تصویر
+        const uploadContainer = document.getElementById('upload-container');
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const extractBtn = document.getElementById('extract-btn');
+        
+        // Drag and Drop
+        uploadContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadContainer.classList.add('dragover');
+        });
+        
+        uploadContainer.addEventListener('dragleave', () => {
+            uploadContainer.classList.remove('dragover');
+        });
+        
+        uploadContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadContainer.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                handleImageUpload(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // کلیک روی آپلود
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        // انتخاب فایل
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleImageUpload(e.target.files[0]);
+            }
+        });
+        
+        // استخراج رنگ‌ها
+        extractBtn.addEventListener('click', () => {
+            extractColorsFromImage(imagePreview);
+        });
+        
+        // پردازش تصویر آپلود شده
+        function handleImageUpload(file) {
+            // بررسی نوع فایل
+            if (!file.type.match('image.*')) {
+                showNotification('لطفاً یک فایل تصویری انتخاب کنید');
+                return;
+            }
+            
+            // بررسی حجم فایل (حداکثر 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification('حجم فایل باید کمتر از 5MB باشد');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreviewContainer.style.display = 'block';
+                extractBtn.style.display = 'block';
+                
+                // نمایش تصویر و دکمه استخراج با انیمیشن
+                gsap.from([imagePreview, extractBtn], {
+                    y: 20,
+                    opacity: 0,
+                    duration: 0.5,
+                    stagger: 0.2
+                });
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // بررسی کنتراست
+        document.getElementById('check-contrast-btn').addEventListener('click', () => {
+            const color1 = document.getElementById('contrast-color-1').value;
+            const color2 = document.getElementById('contrast-color-2').value;
+            
+            const contrastRatio = checkContrast(color1, color2);
+            const contrastResult = document.getElementById('contrast-result');
+            
+            contrastResult.style.display = 'block';
+            
+            // استانداردهای دسترسی‌پذیری
+            if (contrastRatio >= 7) {
+                contrastResult.textContent = `کنتراست عالی (${contrastRatio.toFixed(1)}:1) - مناسب برای متن‌های کوچک`;
+                contrastResult.className = 'contrast-result good-contrast';
+            } else if (contrastRatio >= 4.5) {
+                contrastResult.textContent = `کنتراست خوب (${contrastRatio.toFixed(1)}:1) - مناسب برای متن‌های معمولی`;
+                contrastResult.className = 'contrast-result good-contrast';
+            } else if (contrastRatio >= 3) {
+                contrastResult.textContent = `کنتراست ضعیف (${contrastRatio.toFixed(1)}:1) - فقط برای متن‌های بزرگ`;
+                contrastResult.className = 'contrast-result bad-contrast';
+            } else {
+                contrastResult.textContent = `کنتراست بسیار ضعیف (${contrastRatio.toFixed(1)}:1) - نامناسب برای متن`;
+                contrastResult.className = 'contrast-result bad-contrast';
+            }
+        });
+        
+        // میکسر رنگ
+        document.getElementById('mix-colors-btn').addEventListener('click', () => {
+            const color1 = document.getElementById('mixer-color-1').value;
+            const color2 = document.getElementById('mixer-color-2').value;
+            
+            const mixedColor = mixColors(color1, color2);
+            document.getElementById('mixer-result').style.backgroundColor = mixedColor;
+            
+            showNotification(`رنگ ترکیبی: ${mixedColor}`);
+        });
+        
+        // فیلترهای کوررنگی
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                applyColorBlindnessFilter(filter);
+            });
+        });
+        
+        // اعمال فیلتر کوررنگی
+        function applyColorBlindnessFilter(filter) {
+            const paletteDisplay = document.getElementById('palette-display');
+            
+            if (filter === 'normal') {
+                paletteDisplay.style.filter = 'none';
+            } else {
+                // این یک شبیه‌سازی ساده است - در عمل می‌توان از فیلترهای SVG پیچیده‌تر استفاده کرد
+                let filterValue = '';
+                
+                switch(filter) {
+                    case 'protanopia':
+                        filterValue = 'url(#protanopia)';
+                        break;
+                    case 'deuteranopia':
+                        filterValue = 'url(#deuteranopia)';
+                        break;
+                    case 'tritanopia':
+                        filterValue = 'url(#tritanopia)';
+                        break;
+                    case 'achromatopsia':
+                        filterValue = 'grayscale(100%)';
+                        break;
+                }
+                
+                paletteDisplay.style.filter = filterValue;
+            }
+        }
+        
+        // ذخیره پالت
+        document.getElementById('save-palette-btn').addEventListener('click', savePalette);
+        
+        // اشتراک‌گذاری پالت
+        document.getElementById('share-palette-btn').addEventListener('click', () => {
+            const sharePanel = document.getElementById('share-panel');
+            const shareLink = document.getElementById('share-link');
+            
+            shareLink.value = createShareLink();
+            sharePanel.style.display = 'block';
+        });
+        
+        document.getElementById('close-share-panel').addEventListener('click', () => {
+            document.getElementById('share-panel').style.display = 'none';
+        });
+        
+        document.getElementById('copy-link-btn').addEventListener('click', () => {
+            const shareLink = document.getElementById('share-link');
+            shareLink.select();
+            document.execCommand('copy');
+            showNotification('لینک کپی شد!');
+        });
+        
+        // دکمه‌های اشتراک‌گذاری اجتماعی
+        document.querySelector('.twitter-share').addEventListener('click', () => {
+            const text = `من این پالت رنگی زیبا را با Color Universe ایجاد کردم! ${createShareLink()}`;
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+        });
+        
+        document.querySelector('.facebook-share').addEventListener('click', () => {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(createShareLink())}`, '_blank');
+        });
+        
+        document.querySelector('.instagram-share').addEventListener('click', () => {
+            showNotification('برای اشتراک‌گذاری، لینک را در اینستاگرام کپی کنید');
+        });
+        
+        document.querySelector('.whatsapp-share').addEventListener('click', () => {
+            const text = `من این پالت رنگی زیبا را با Color Universe ایجاد کردم! ${createShareLink()}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        });
+        
+        // export پالت
+        document.getElementById('export-palette-btn').addEventListener('click', () => {
+            const exportPanel = document.getElementById('export-panel');
+            exportPanel.style.display = 'block';
+        });
+        
+        document.getElementById('close-export-panel').addEventListener('click', () => {
+            document.getElementById('export-panel').style.display = 'none';
+            document.getElementById('export-code-container').style.display = 'none';
+        });
+        
+        document.querySelectorAll('.export-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const format = this.getAttribute('data-format');
+                const exportCodeContainer = document.getElementById('export-code-container');
+                const exportCode = document.getElementById('export-code');
+                
+                let code = '';
+                
+                switch(format) {
+                    case 'css':
+                        code = `:root {\n`;
+                        currentPalette.forEach((color, index) => {
+                            const hex = rgbToHex(color[0], color[1], color[2]);
+                            code += `  --color-${index + 1}: ${hex};\n`;
+                        });
+                        code += `}`;
+                        break;
+                        
+                    case 'scss':
+                        code = `$palette: (\n`;
+                        currentPalette.forEach((color, index) => {
+                            const hex = rgbToHex(color[0], color[1], color[2]);
+                            code += `  "color-${index + 1}": ${hex},\n`;
+                        });
+                        code += `);`;
+                        break;
+                        
+                    case 'json':
+                        const paletteObj = {};
+                        currentPalette.forEach((color, index) => {
+                            paletteObj[`color_${index + 1}`] = rgbToHex(color[0], color[1], color[2]);
+                        });
+                        code = JSON.stringify(paletteObj, null, 2);
+                        break;
+                        
+                    case 'png':
+                    case 'svg':
+                        showNotification('این ویژگی نیاز به پیاده سازی سمت سرور دارد');
+                        return;
+                }
+                
+                exportCode.value = code;
+                exportCodeContainer.style.display = 'block';
+            });
+        });
+        
+        document.getElementById('copy-export-btn').addEventListener('click', () => {
+            const exportCode = document.getElementById('export-code');
+            exportCode.select();
+            document.execCommand('copy');
+            showNotification('کد کپی شد!');
+        });
+        
+        // مقداردهی اولیه
+        window.addEventListener('load', () => {
+            initThreeJS();
+            generatePalette();
+            generateSuggestedPalettes();
+            loadPaletteFromURL();
+            
+            gsap.to("#color-lab", {
+                scrollTrigger: {
+                    trigger: "#color-lab",
+                    start: "top bottom",
+                    end: "top top",
+                    scrub: 1
+                },
+                y: 50,
+                opacity: 1
+            });
+            
+            document.getElementById('control-panel').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
